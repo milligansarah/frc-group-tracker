@@ -1,24 +1,26 @@
+import InputPanelContentComponent from './InputPanelContentComponent';
+import OutputPanelContentComponent from './OutputPanelContentComponent';
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useSearchParams } from 'react-router-dom';
+
+const darkBlueBackgroundColor = '#2E3047'
+const textColor = '#EEEEEE'
 
 function App() {
+  // Use search query paramaters to build the UI
+  const [searchParams] = useSearchParams();
+  const teams : string[] | undefined = searchParams.get('teams')?.split(',')
+  const startYear : number | null = Number(searchParams.get('start_year'))
+  const endYear : number | null = Number(searchParams.get('end_year'))
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{display: 'flex', backgroundColor: darkBlueBackgroundColor}}>
+      <div style={{width: "25%", height: '100vh'}}>
+        <InputPanelContentComponent teams={teams} startYear={startYear} endYear={endYear}/>
+      </div>
+      <div style={{width: "75%", height: '100vh'}}>
+        <OutputPanelContentComponent teams={teams} startYear={startYear} endYear={endYear}/>
+      </div>
     </div>
   );
 }

@@ -1,13 +1,102 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --fadedBlueTextboxColor: #707793;
+  --tealColor: #3BBA9C;
+  --tealColorButtonFaded: #3BBA9CA0;
+  --tealColorButtonFadedShadow: #3BBA9C55;
+  --fadedBlueTextboxShadow: #707793A0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  margin: 0;
+}
+
+h1 {
+  font-size: x-large;
+}
+
+h1, p {
+  color: #EEEEEE;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#teams-input-boxes > input {
+  margin-bottom: 10px;
+  margin-right: 5px;
+  /* Subtract padding-left */
+  width: calc(100% - 15px); 
+}
+
+#teams-input-boxes > input:last-child{
+  margin-bottom: 0px;
+}
+
+input {
+  background-color:var(--fadedBlueTextboxColor);
+  border: none;
+  height: 30px;
+  padding-left: 15px;
+  color: #EEEEEE;
+}
+
+input:focus {
+  border: none;
+  outline: none;
+  box-shadow: -2px 2px var(--fadedBlueTextboxShadow);
+}
+
+button {
+  background-color: var(--tealColorButtonFaded);
+  color: #EEEEEE;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: small;
+  box-shadow: -3px 4px var(--tealColorButtonFadedShadow);
+  margin-top: 38px;
+  transform: translate(3px, -4px)
+}
+
+button:active {
+  box-shadow: none;
+  transform: translate(0, 0);
+}
+
+.material-icon {
+  color: #EEEEEE;
+}
+
+#add-button {
+  margin-bottom: 8px;
+}
+
+#dash-icon {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+#teams-input-boxes {
+  max-height: 40vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-bottom: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  transform: translate(5px, 5px)
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #e7e7e7;
+  border: 1px solid #cacaca;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: gray;
+}
+
+#loading-icon {
+  color: #EEEEEE
 }
