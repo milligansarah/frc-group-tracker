@@ -100,3 +100,23 @@ button:active {
 #loading-icon {
   color: #EEEEEE
 }
+
+.line {
+  width: 30px;
+  height: 2px;
+  background-color: var(--tealColor);
+}
+
+#dashed-line {
+  outline-style: dashed;
+  outline-width: 2px;
+  outline-color: var(--tealColor);
+  background-color: transparent;
+  outline-offset: -1px;
+  height: 2px;
+}
+
+#custom-tooltip {
+  font-size: 14px;
+  line-height: 2px;
+}
