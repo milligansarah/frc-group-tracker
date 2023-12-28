@@ -112,7 +112,7 @@ button:active {
   outline-width: 2px;
   outline-color: var(--tealColor);
   background-color: transparent;
-  outline-offset: -1px;
+  outline-offset: -3px;
   height: 2px;
 }
 
