@@ -14,6 +14,50 @@ type teamAPIRequestType = {
     "team_key": string
 }
 
+function getMean(data : number[]) {
+    return data.reduce((previousValue, currentValue) => previousValue + currentValue, 0) / data.length
+}
+
+function getMedian(data: number[]) {
+    let median : number | undefined;
+    if (data.length % 2 == 1) {
+        median = data.at(Math.floor(data.length / 2))
+    }
+    else {
+        median = (data.at(data.length / 2)! + data.at(data.length / 2 - 1)!) / 2
+    }
+    return median
+}
+
+function getStandardDeviation(data: number[], mean: number) {
+    let standardDeviation : number = 0;
+    for (const rankIndex in data) {
+        standardDeviation += Math.pow((data[rankIndex] - mean), 2)
+    }
+    standardDeviation = Math.sqrt(standardDeviation / (data.length - 1))
+    return standardDeviation;
+}
+
+function getLowerQuartile(data: number[]) {
+    let dataLength : number = data.length
+    if (dataLength % 4 == 0) {
+        return (data[dataLength / 4] + data[dataLength / 4 - 1]) / 2
+    }
+    else {
+        return data[Math.floor(dataLength / 4)]
+    }
+}
+
+function getUpperQuartile(data: number[]) {
+    let dataLength : number = data.length
+    if (dataLength % 4 == 0) {
+        return (data[dataLength - (dataLength / 4)] + data[dataLength - (dataLength / 4) - 1]) / 2
+    }
+    else {
+        return data[dataLength - Math.floor(dataLength / 4) - 1]
+    }
+}
+
 function GraphOutputComponent(props: queryType) {
     type graphDataType = [{}?]
     const [newData, setNewData] = useState([] as graphDataType)
@@ -39,6 +83,7 @@ function GraphOutputComponent(props: queryType) {
                     if (teamPoints != 0) {
                         totalTeamsPlayed += 1
                         if (props.teams?.includes(teamNumber)) {
+                            console.log(teamNumber + " at rank " + teamObject['rank'])
                             ranks.push(teamObject['rank'])
                         }
                     }
@@ -47,35 +92,32 @@ function GraphOutputComponent(props: queryType) {
                 for (const rankIndex in ranks) {
                     ranks[rankIndex] = 100 - ranks[rankIndex] / totalTeamsPlayed * 100
                 }
+                // Sort the data
+                ranks.sort()
                 // Get the mean
-                const mean : number = ranks.reduce((previousValue, currentValue) => previousValue + currentValue, 0) / ranks.length
+                const mean : number = getMean(ranks)
                 // Get the median
-                let median : number | undefined = 0;
-                if (ranks.length % 2 == 1) {
-                    median = ranks.sort().at(Math.floor(ranks.length / 2))
-                }
-                else {
-                    median = (ranks.sort().at(ranks.length / 2)! + ranks.sort().at(ranks.length / 2 - 1)!) / 2
-                }
+                let median : number | undefined = getMedian(ranks);
                 // Get the standard deviation
-                let standardDeviation : number = 0;
-                for (const rankIndex in ranks) {
-                    standardDeviation += Math.pow((ranks[rankIndex] - mean), 2)
-                }
-                standardDeviation = Math.sqrt(standardDeviation / (ranks.length - 1))
-
+                let standardDeviation : number = getStandardDeviation(ranks, mean);
+                // Get the lower quartile
+                let lowerQuartile : number = getLowerQuartile(ranks);
+                // Get the upper quartile
+                let upperQuartile : number = getUpperQuartile(ranks);
                 newData.push({
                     Year: year,
                     median: Number(median!.toFixed(2)),
                     mean: Number(mean.toFixed(2)),
-                    min: mean - standardDeviation * 2,
-                    bottomWhisker: standardDeviation,
-                    bottomBox: standardDeviation, 
-                    topBox: standardDeviation,
-                    topWhisker: standardDeviation, 
+                    min: ranks[0],
+                    bottomWhisker: lowerQuartile - ranks[0],
+                    bottomBox: median! - lowerQuartile, 
+                    topBox: upperQuartile - median!,
+                    topWhisker: ranks[ranks.length - 1] - upperQuartile, 
+                    max: ranks[ranks.length - 1]
                 })
 
                 setNewData(newData)
+                console.log(ranks)
             }
         }
         const test : {} | undefined = newData.at(0)
@@ -155,14 +197,27 @@ function GraphOutputComponent(props: queryType) {
 
     const CustomTooltip = ({ active, payload, label } : any) => {
         if (active && payload && payload.length) {
-          return (
-            <div id="custom-tooltip">
-              <p>{label}</p>
-              <p>Mean Percentile Rank: {payload[0].value}</p>
-              <p>Median Percentile Rank: {payload[1].value}</p>
-              <p>Standard Deviation From Mean: {payload[3].value.toFixed(2)}</p>
-            </div>
-          );
+            let mean : number = payload[0].value
+            let median : number | undefined = payload[1].value
+            let min : number = payload[2].value
+            let bottomWhiskerBarHeight : number = payload[3].value
+            let lowerQuartile : number = bottomWhiskerBarHeight + min
+            let topWhiskerBarHeight : number = payload[5].value
+            let upperQuartile : number = topWhiskerBarHeight + median!
+            let max : number = payload[6].value + upperQuartile
+            console.log(median)
+            return (
+                <div id="custom-tooltip">
+                    <p>{label}</p>
+                    <p style={{fontSize: 10}}>All values describe <i>percentile rank</i></p>
+                    <p>Mean: {mean.toFixed(2)}</p>
+                    <p>Minimum: {min.toFixed(2)}</p>
+                    <p>1st Quartile: {lowerQuartile.toFixed(2)}</p>
+                    <p>Median: {median!.toFixed(2)}</p>
+                    <p>3rd Quartile: {upperQuartile.toFixed(2)}</p>
+                    <p>Maximum: {max.toFixed(2)}</p>
+                </div>
+            );
         }
         
         return null;
@@ -198,7 +253,7 @@ function GraphOutputComponent(props: queryType) {
         <ComposedChart width={550} height={550} data={newData}>
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
-            <YAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
+            <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
             <Tooltip content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
             <Line type="monotone" dataKey="mean" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
