@@ -243,11 +243,11 @@ function GraphOutputComponent(props: queryType) {
         <div style={{display: 'flex', justifyContent: 'center'}}>
                 <div style={{display: 'flex', alignItems: "center", marginRight: 30}}>
                     <p style={{fontSize: 12, marginRight: 10}}>Mean Percentile Rank</p>
-                    <div className="line"></div>
+                    <div className="line" id="dashed-line"></div>
                 </div>
                 <div style={{display: 'flex', alignItems: "center"}}>
                     <p style={{fontSize: 12, marginRight: 10}}>Median Percentile Rank</p>
-                    <div className="line" id="dashed-line"></div>
+                    <div className="line"></div>
                 </div>
         </div>
         <ComposedChart width={550} height={550} data={newData}>
@@ -255,8 +255,8 @@ function GraphOutputComponent(props: queryType) {
             <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
             <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
             <Tooltip content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
-            <Line type="monotone" dataKey="mean" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
-            <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
+            <Line type="monotone" dataKey="mean" stroke={tealColor} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
+            <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bottomWhisker'} shape={<DotBar />} legendType="none" activeBar={false}/>
