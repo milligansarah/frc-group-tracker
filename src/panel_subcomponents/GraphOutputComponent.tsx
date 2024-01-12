@@ -71,6 +71,7 @@ function GraphOutputComponent(props: queryType) {
         for (let yearIndex in years) {
             const year : number = years[yearIndex]
             if (year != 2021) {
+                console.log(year)
                 const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + 'fim/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV	');
                 let json = await response.json();
                 const ranks : number[] = []
@@ -83,7 +84,6 @@ function GraphOutputComponent(props: queryType) {
                     if (teamPoints != 0) {
                         totalTeamsPlayed += 1
                         if (props.teams?.includes(teamNumber)) {
-                            console.log(teamNumber + " at rank " + teamObject['rank'])
                             ranks.push(teamObject['rank'])
                         }
                     }
@@ -115,9 +115,8 @@ function GraphOutputComponent(props: queryType) {
                     topWhisker: ranks[ranks.length - 1] - upperQuartile, 
                     max: ranks[ranks.length - 1]
                 })
-
-                setNewData(newData)
                 console.log(ranks)
+                setNewData(newData)
             }
         }
         const test : {} | undefined = newData.at(0)
@@ -205,7 +204,6 @@ function GraphOutputComponent(props: queryType) {
             let topWhiskerBarHeight : number = payload[5].value
             let upperQuartile : number = topWhiskerBarHeight + median!
             let max : number = payload[6].value + upperQuartile
-            console.log(median)
             return (
                 <div id="custom-tooltip">
                     <p>{label}</p>
@@ -242,12 +240,12 @@ function GraphOutputComponent(props: queryType) {
     return show ? <CircularProgress id="loading-icon"/>: <div>
         <div style={{display: 'flex', justifyContent: 'center'}}>
                 <div style={{display: 'flex', alignItems: "center", marginRight: 30}}>
-                    <p style={{fontSize: 12, marginRight: 10}}>Mean Percentile Rank</p>
-                    <div className="line" id="dashed-line"></div>
-                </div>
-                <div style={{display: 'flex', alignItems: "center"}}>
                     <p style={{fontSize: 12, marginRight: 10}}>Median Percentile Rank</p>
                     <div className="line"></div>
+                </div>
+                <div style={{display: 'flex', alignItems: "center"}}>
+                    <p style={{fontSize: 12, marginRight: 10}}>Mean Percentile Rank</p>
+                    <div className="line" id="dashed-line"></div>
                 </div>
         </div>
         <ComposedChart width={550} height={550} data={newData}>
@@ -255,7 +253,7 @@ function GraphOutputComponent(props: queryType) {
             <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
             <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
             <Tooltip content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
-            <Line type="monotone" dataKey="mean" stroke={tealColor} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
+            <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} legendType="none" activeBar={false}/>

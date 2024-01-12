@@ -108,11 +108,8 @@ button:active {
 }
 
 #dashed-line {
-  outline-style: dashed;
-  outline-width: 2px;
-  outline-color: var(--tealColor);
+  border-bottom: 2px dashed var(--tealColor);
   background-color: transparent;
-  outline-offset: -3px;
   height: 2px;
 }
 
