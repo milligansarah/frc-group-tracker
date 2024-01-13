@@ -74,7 +74,7 @@ function GraphOutputComponent(props: queryType) {
                 console.log(year)
                 const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + 'fim/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV	');
                 let json = await response.json();
-                const ranks : number[] = []
+                let ranks : number[] = []
                 let totalTeamsPlayed : number = 0;
                 // For each team in the data fethed from the API, add the teams ranking to a list if it is in our teams input
                 for (let index in json) {
@@ -93,7 +93,9 @@ function GraphOutputComponent(props: queryType) {
                     ranks[rankIndex] = 100 - ranks[rankIndex] / totalTeamsPlayed * 100
                 }
                 // Sort the data
-                ranks.sort()
+                ranks = ranks.sort(function(a, b) {
+                    return a - b;
+                })
                 // Get the mean
                 const mean : number = getMean(ranks)
                 // Get the median
