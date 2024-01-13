@@ -211,14 +211,14 @@ function GraphOutputComponent(props: queryType) {
             return (
                 <div id="custom-tooltip" style={{width: 140}}>
                     <p>{label}</p>
-                    <p style={{fontSize: 8}}>All values except Teams Played describe <i>percentile rank</i></p>
+                    <p style={{fontSize: 8}}>All values except Teams Included describe <i>percentile rank</i></p>
                     <p>Mean: {mean.toFixed(2)}</p>
                     <p>Minimum: {min.toFixed(2)}</p>
                     <p>1st Quartile: {lowerQuartile.toFixed(2)}</p>
                     <p>Median: {median!.toFixed(2)}</p>
                     <p>3rd Quartile: {upperQuartile.toFixed(2)}</p>
                     <p>Maximum: {max.toFixed(2)}</p>
-                    <p>Teams Played: {numTeams}</p>
+                    <p>Teams Included: {numTeams}</p>
                 </div>
             );
         }
