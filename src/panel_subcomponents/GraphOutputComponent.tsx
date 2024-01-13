@@ -3,6 +3,7 @@ import { Bar, CartesianGrid, ComposedChart, DotProps, ErrorBar, Legend, Line, Li
 import queryType from "../QueryType";
 import { CircularProgress } from "@mui/material";
 import '../index.css';
+import { useHover } from "@uidotdev/usehooks";
 
 const tealColor = '#3BBA9C'
 const tealColorClear = '#3BBA9CAA'
@@ -27,15 +28,6 @@ function getMedian(data: number[]) {
         median = (data.at(data.length / 2)! + data.at(data.length / 2 - 1)!) / 2
     }
     return median
-}
-
-function getStandardDeviation(data: number[], mean: number) {
-    let standardDeviation : number = 0;
-    for (const rankIndex in data) {
-        standardDeviation += Math.pow((data[rankIndex] - mean), 2)
-    }
-    standardDeviation = Math.sqrt(standardDeviation / (data.length - 1))
-    return standardDeviation;
 }
 
 function getLowerQuartile(data: number[]) {
@@ -71,7 +63,7 @@ function GraphOutputComponent(props: queryType) {
         for (let yearIndex in years) {
             const year : number = years[yearIndex]
             if (year != 2021) {
-                console.log(year)
+                // console.log(year)
                 const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + 'fim/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV	');
                 let json = await response.json();
                 let ranks : number[] = []
@@ -118,7 +110,7 @@ function GraphOutputComponent(props: queryType) {
                     max: ranks[ranks.length - 1],
                     numTeams: numTeams
                 })
-                console.log(ranks)
+                // console.log(ranks)
                 setNewData(newData)
             }
         }
@@ -226,19 +218,19 @@ function GraphOutputComponent(props: queryType) {
         return null;
     };
 
-    const ActiveDot = (props: any) => {
-        const { cx, cy } = props;
+    let ActiveDot = (props: any) => {
+        const { cx, cy, type } = props;
 
         return (
-            <circle cx={cx} cy={cy} r={8} stroke={tealColorClear} strokeWidth={2} fill="transparent" />
+            <circle cx={cx} cy={cy} r={type.includes("median") ? 8 : 6} stroke={tealColorClear} strokeWidth={2} fill="transparent" />
         );
     };
 
     const CustomDot = (props: any) => {
-        const { cx, cy } = props;
+        const { cx, cy, type } = props;
 
         return (
-            <circle cx={cx} cy={cy} r={5} fill={tealColorClear} />
+            <circle cx={cx} cy={cy} r={type.includes("median") ? 5 : 4} fill={tealColorClear} />
         );
     };
 
@@ -255,11 +247,11 @@ function GraphOutputComponent(props: queryType) {
         </div>
         <ComposedChart width={800} height={550} data={newData}>
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
-            <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
+            <CartesianGrid opacity={"15%"} stroke="#EEEEEE" />
             <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
             <Tooltip position={{ x: -100, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
-            <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
-            <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
+            <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot type="mean"/>} dot={<CustomDot type="mean"/>}/>
+            <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot type="median"/>} dot={<CustomDot type="median"/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bottomWhisker'} shape={<DotBar />} legendType="none" activeBar={false}/>
