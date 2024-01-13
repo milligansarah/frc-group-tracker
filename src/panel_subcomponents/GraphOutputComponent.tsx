@@ -100,12 +100,12 @@ function GraphOutputComponent(props: queryType) {
                 const mean : number = getMean(ranks)
                 // Get the median
                 let median : number | undefined = getMedian(ranks);
-                // Get the standard deviation
-                let standardDeviation : number = getStandardDeviation(ranks, mean);
                 // Get the lower quartile
                 let lowerQuartile : number = getLowerQuartile(ranks);
                 // Get the upper quartile
                 let upperQuartile : number = getUpperQuartile(ranks);
+                // Number of teams
+                let numTeams : number = ranks.length;
                 newData.push({
                     Year: year,
                     median: Number(median!.toFixed(2)),
@@ -115,7 +115,8 @@ function GraphOutputComponent(props: queryType) {
                     bottomBox: median! - lowerQuartile, 
                     topBox: upperQuartile - median!,
                     topWhisker: ranks[ranks.length - 1] - upperQuartile, 
-                    max: ranks[ranks.length - 1]
+                    max: ranks[ranks.length - 1],
+                    numTeams: numTeams
                 })
                 console.log(ranks)
                 setNewData(newData)
@@ -206,16 +207,18 @@ function GraphOutputComponent(props: queryType) {
             let topWhiskerBarHeight : number = payload[5].value
             let upperQuartile : number = topWhiskerBarHeight + median!
             let max : number = payload[6].value + upperQuartile
+            let numTeams : number = payload[7].value
             return (
                 <div id="custom-tooltip">
                     <p>{label}</p>
-                    <p style={{fontSize: 10}}>All values describe <i>percentile rank</i></p>
+                    <p style={{fontSize: 8}}>All values except Teams Played describe <i>percentile rank</i></p>
                     <p>Mean: {mean.toFixed(2)}</p>
                     <p>Minimum: {min.toFixed(2)}</p>
                     <p>1st Quartile: {lowerQuartile.toFixed(2)}</p>
                     <p>Median: {median!.toFixed(2)}</p>
                     <p>3rd Quartile: {upperQuartile.toFixed(2)}</p>
                     <p>Maximum: {max.toFixed(2)}</p>
+                    <p>Teams Played: {numTeams}</p>
                 </div>
             );
         }
@@ -250,7 +253,7 @@ function GraphOutputComponent(props: queryType) {
                     <div className="line" id="dashed-line"></div>
                 </div>
         </div>
-        <ComposedChart width={550} height={550} data={newData}>
+        <ComposedChart width={800} height={550} data={newData}>
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
             <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
@@ -264,6 +267,7 @@ function GraphOutputComponent(props: queryType) {
             <Bar stackId={'a'} dataKey={'topBox'} shape={<BarOutline/>} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'topWhisker'} shape={<DotBar />} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} legendType="none" activeBar={false}/>
+            <Bar stackId={'a'} dataKey={'numTeams'} fill={'none'}/>
         <ZAxis type='number' dataKey='size' range={[0, 250]} />
         </ComposedChart>
     </div>
