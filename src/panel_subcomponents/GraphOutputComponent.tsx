@@ -209,7 +209,7 @@ function GraphOutputComponent(props: queryType) {
             let max : number = payload[6].value + upperQuartile
             let numTeams : number = payload[7].value
             return (
-                <div id="custom-tooltip">
+                <div id="custom-tooltip" style={{width: 140}}>
                     <p>{label}</p>
                     <p style={{fontSize: 8}}>All values except Teams Played describe <i>percentile rank</i></p>
                     <p>Mean: {mean.toFixed(2)}</p>
@@ -242,7 +242,7 @@ function GraphOutputComponent(props: queryType) {
         );
     };
 
-    return show ? <CircularProgress id="loading-icon"/>: <div>
+    return show ? <CircularProgress id="loading-icon"/>: <div style={{transform: 'translate(50px, 0)'}}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
                 <div style={{display: 'flex', alignItems: "center", marginRight: 30}}>
                     <p style={{fontSize: 12, marginRight: 10}}>Median Percentile Rank</p>
@@ -257,7 +257,7 @@ function GraphOutputComponent(props: queryType) {
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"50%"} stroke="#EEEEEE" />
             <YAxis domain={[0,100]} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
-            <Tooltip content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
+            <Tooltip position={{ x: -100, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
             <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot/>} dot={<CustomDot/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>

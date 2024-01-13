@@ -117,3 +117,8 @@ button:active {
   font-size: 14px;
   line-height: 2px;
 }
+
+#custom-tooltip > * {
+  line-height: 1;
+  margin-bottom: 5px;
+}
