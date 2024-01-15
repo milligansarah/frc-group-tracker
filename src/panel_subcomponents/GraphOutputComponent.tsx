@@ -75,7 +75,7 @@ function GraphOutputComponent(props: queryType) {
             const year : number = years[yearIndex]
             // Remove 2021 from the graph, because of the Covid cancellation
             if (year != 2021) {
-                let rankingResponses : any = {};
+                let districtsFetched : any = [];
                 // Get the percentile ranking for each team in their own district
                 const percentileRanks = [];
                 let returningVeterans = 0;
@@ -87,7 +87,8 @@ function GraphOutputComponent(props: queryType) {
                     const teamDistrictId = districtTeamPairs[team]
                     // If we don't have the ranking data for the current team's district yet, fetch that data
                     // and compute the percentile rankings for each team in that district (in the user's group)
-                    if (rankingResponses[team] == undefined) {
+                    if (districtsFetched.includes(teamDistrictId) == false) {
+                        districtsFetched.push(teamDistrictId)
                         const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + '' + teamDistrictId + '/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
                         let json = await response.json();
                         let ranks : number[] = []
