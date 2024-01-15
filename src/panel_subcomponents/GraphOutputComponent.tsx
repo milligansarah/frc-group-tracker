@@ -59,68 +59,94 @@ function GraphOutputComponent(props: queryType) {
         const startYear : number = props.startYear as number
         const endYear : number = props.endYear as number
         const years : number[] = Array.from({length: endYear - startYear + 1}, (_, index) => startYear + index)
+        const allPercentileRanks : any = {};
+        // Get the district names for each team
+        let districtTeamPairs : any = {};
+        for (let teamIndex in props.teams) {
+            const team : string = props.teams[Number(teamIndex)];
+            const districtResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/districts?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
+            const districtJson = await districtResponse.json();
+            const districtId = districtJson[0]['abbreviation'];
+            districtTeamPairs[team] = districtId
+        }
+        console.log(districtTeamPairs)
         // For each year in the range
         for (let yearIndex in years) {
             const year : number = years[yearIndex]
+            // Remove 2021 from the graph, because of the Covid cancellation
             if (year != 2021) {
-                // console.log(year)
-                const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + 'fim/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV	');
-                let json = await response.json();
-                let ranks : number[] = []
-                let totalTeamsPlayed : number = 0;
-                // For each team in the data fethed from the API, add the teams ranking to a list if it is in our teams input
-                for (let index in json) {
-                    const teamObject : teamAPIRequestType = json[index]
-                    const teamNumber : string = teamObject['team_key'].substring(3)
-                    const teamPoints : number = teamObject['point_total']
-                    if (teamPoints != 0) {
-                        totalTeamsPlayed += 1
-                        if (props.teams?.includes(teamNumber)) {
-                            ranks.push(teamObject['rank'])
+                let rankingResponses : any = {};
+                // Get the percentile ranking for each team in their own district
+                const percentileRanks = [];
+                let returningVeterans = 0;
+                let restartedVeterans = 0;
+                let rookieTeams = 0;
+                let foldedTeams = 0;
+                for (let teamIndex in props.teams) {
+                    const team = props.teams[Number(teamIndex)]
+                    const teamDistrictId = districtTeamPairs[team]
+                    // If we don't have the ranking data for the current team's district yet, fetch that data
+                    // and compute the percentile rankings for each team in that district (in the user's group)
+                    if (rankingResponses[team] == undefined) {
+                        const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + '' + teamDistrictId + '/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
+                        let json = await response.json();
+                        let ranks : number[] = []
+                        let totalTeamsPlayed : number = 0;
+                        // For each team in the data fetched from the API, add the team's ranking to a list if it is in the user's group
+                        for (let index in json) {
+                            const teamObject : teamAPIRequestType = json[index]
+                            const teamNumber : string = teamObject['team_key'].substring(3)
+                            const teamPoints : number = teamObject['point_total']
+                            if (teamPoints != 0) {
+                                totalTeamsPlayed += 1
+                                // This will add all teams
+                                if (props.teams?.includes(teamNumber)) {
+                                    ranks.push(teamObject['rank'])
+                                }
+                            }
+                        }
+                        // Compute the percentile rankings for each team and push it to our global percentile ranks object
+                        for (const rankIndex in ranks) {
+                            percentileRanks.push(100 - ranks[rankIndex] / totalTeamsPlayed * 100)
                         }
                     }
                 }
-                // Convert ranks to percentiles
-                for (const rankIndex in ranks) {
-                    ranks[rankIndex] = 100 - ranks[rankIndex] / totalTeamsPlayed * 100
-                }
                 // Sort the data
-                ranks = ranks.sort(function(a, b) {
+                percentileRanks.sort(function(a, b) {
                     return a - b;
                 })
                 // Get the mean
-                const mean : number = getMean(ranks)
+                const mean : number = getMean(percentileRanks)
                 // Get the median
-                let median : number | undefined = getMedian(ranks);
+                let median : number | undefined = getMedian(percentileRanks);
                 // Get the lower quartile
-                let lowerQuartile : number = getLowerQuartile(ranks);
+                let lowerQuartile : number = getLowerQuartile(percentileRanks);
                 // Get the upper quartile
-                let upperQuartile : number = getUpperQuartile(ranks);
+                let upperQuartile : number = getUpperQuartile(percentileRanks);
                 // Number of teams
-                let numTeams : number = ranks.length;
+                let numTeams : number = percentileRanks.length;
                 newData.push({
                     Year: year,
                     median: Number(median!.toFixed(2)),
                     mean: Number(mean.toFixed(2)),
-                    min: ranks[0],
-                    bottomWhisker: lowerQuartile - ranks[0],
+                    min: percentileRanks[0],
+                    bottomWhisker: lowerQuartile - percentileRanks[0],
                     bottomBox: median! - lowerQuartile, 
                     topBox: upperQuartile - median!,
-                    topWhisker: ranks[ranks.length - 1] - upperQuartile, 
-                    max: ranks[ranks.length - 1],
+                    topWhisker: percentileRanks[percentileRanks.length - 1] - upperQuartile, 
+                    max: percentileRanks[percentileRanks.length - 1],
                     numTeams: numTeams
                 })
                 // console.log(ranks)
+                allPercentileRanks[year] = percentileRanks
                 setNewData(newData)
             }
         }
-        const test : {} | undefined = newData.at(0)
         if (typeof newData.at(0) == "object") {
             newData.slice(0, 1)
             setNewData(newData)
         }
         setShow(false);
-        
     }
 
     fetchData()
