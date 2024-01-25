@@ -60,14 +60,19 @@ function GraphOutputComponent(props: queryType) {
         const endYear : number = props.endYear as number
         const years : number[] = Array.from({length: endYear - startYear + 1}, (_, index) => startYear + index)
         const allPercentileRanks : any = {};
-        // Get the district names for each team
+        // Get the district IDs for each team and
+        // Get a list of years played for each team (used for several stat calculations)
         let districtTeamPairs : any = {};
+        let yearsPlayed : any = {}
         for (let teamIndex in props.teams) {
             const team : string = props.teams[Number(teamIndex)];
             const districtResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/districts?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
             const districtJson = await districtResponse.json();
             const districtId = districtJson[0]['abbreviation'];
-            districtTeamPairs[team] = districtId
+            districtTeamPairs[team] = districtId;
+            const yearsPlayedResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/years_participated?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
+            const yearsPlayedArray = await yearsPlayedResponse.json();
+            yearsPlayed[team] = yearsPlayedArray
         }
         console.log(districtTeamPairs)
         // For each year in the range
@@ -91,18 +96,41 @@ function GraphOutputComponent(props: queryType) {
                         districtsFetched.push(teamDistrictId)
                         const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + '' + teamDistrictId + '/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
                         let json = await response.json();
+                        console.log(json)
                         let ranks : number[] = []
                         let totalTeamsPlayed : number = 0;
                         // For each team in the data fetched from the API, add the team's ranking to a list if it is in the user's group
                         for (let index in json) {
                             const teamObject : teamAPIRequestType = json[index]
-                            const teamNumber : string = teamObject['team_key'].substring(3)
+                            const teamNumber : string | undefined = teamObject['team_key']?.substring(3)
                             const teamPoints : number = teamObject['point_total']
-                            if (teamPoints != 0) {
+                            const currentTeamYearsPlayed = yearsPlayed[teamNumber]
+                            if (teamPoints != 0 && teamNumber != undefined) {
                                 totalTeamsPlayed += 1
                                 // This will add all teams
                                 if (props.teams?.includes(teamNumber)) {
                                     ranks.push(teamObject['rank'])
+                                    // If the team played the current year
+                                    if (currentTeamYearsPlayed.includes(year)) {
+                                        // If the team also played the prior year
+                                        if (currentTeamYearsPlayed.includes(year-1)) {
+                                            returningVeterans += 1;
+                                        }
+                                        // If this is the team's first year of play
+                                        else if (currentTeamYearsPlayed[0] == year) {
+                                            rookieTeams += 1;
+                                        }
+                                        // If the team didn't play in the prior year, but played in at least one year before
+                                        else if (currentTeamYearsPlayed.includes(year-1) == false 
+                                        && Array.from({length: (year-2) - 1992 + 1}, (_, index) => startYear + index).some((year) => currentTeamYearsPlayed.includes(year))) {
+                                            restartedVeterans += 1;
+                                        }
+                                    }
+                                }
+                            }
+                            else if (props.teams?.includes(teamNumber)) {
+                                if (currentTeamYearsPlayed.includes(year-1)) {
+                                    foldedTeams += 1
                                 }
                             }
                         }
@@ -117,7 +145,7 @@ function GraphOutputComponent(props: queryType) {
                     return a - b;
                 })
                 // Get the mean
-                const mean : number = getMean(percentileRanks)
+                let mean : number = getMean(percentileRanks)
                 // Get the median
                 let median : number | undefined = getMedian(percentileRanks);
                 // Get the lower quartile
@@ -126,18 +154,35 @@ function GraphOutputComponent(props: queryType) {
                 let upperQuartile : number = getUpperQuartile(percentileRanks);
                 // Number of teams
                 let numTeams : number = percentileRanks.length;
-                newData.push({
-                    Year: year,
-                    median: Number(median!.toFixed(2)),
-                    mean: Number(mean.toFixed(2)),
-                    min: percentileRanks[0],
-                    bottomWhisker: lowerQuartile - percentileRanks[0],
-                    bottomBox: median! - lowerQuartile, 
-                    topBox: upperQuartile - median!,
-                    topWhisker: percentileRanks[percentileRanks.length - 1] - upperQuartile, 
-                    max: percentileRanks[percentileRanks.length - 1],
-                    numTeams: numTeams
-                })
+                // If no teams participated, 
+                if (numTeams == 0) {
+                    newData.push({
+                        Year: year,
+                        numTeams: numTeams,
+                        returningVeterans: returningVeterans,
+                        restartedVeterans: restartedVeterans,
+                        rookieTeams: rookieTeams,
+                        foldedTeams: foldedTeams
+                    })
+                }
+                else {
+                    newData.push({
+                        Year: year,
+                        median: Number(median!.toFixed(2)),
+                        mean: Number(mean.toFixed(2)),
+                        min: percentileRanks[0],
+                        bottomWhisker: lowerQuartile - percentileRanks[0],
+                        bottomBox: median! - lowerQuartile, 
+                        topBox: upperQuartile - median!,
+                        topWhisker: percentileRanks[percentileRanks.length - 1] - upperQuartile, 
+                        max: percentileRanks[percentileRanks.length - 1],
+                        numTeams: numTeams,
+                        returningVeterans: returningVeterans,
+                        restartedVeterans: restartedVeterans,
+                        rookieTeams: rookieTeams,
+                        foldedTeams: foldedTeams
+                    })
+                }
                 // console.log(ranks)
                 allPercentileRanks[year] = percentileRanks
                 setNewData(newData)
@@ -218,26 +263,49 @@ function GraphOutputComponent(props: queryType) {
 
     const CustomTooltip = ({ active, payload, label } : any) => {
         if (active && payload && payload.length) {
-            let mean : number = payload[0].value
-            let median : number | undefined = payload[1].value
-            let min : number = payload[2].value
-            let bottomWhiskerBarHeight : number = payload[3].value
-            let lowerQuartile : number = bottomWhiskerBarHeight + min
-            let topWhiskerBarHeight : number = payload[5].value
-            let upperQuartile : number = topWhiskerBarHeight + median!
-            let max : number = payload[6].value + upperQuartile
-            let numTeams : number = payload[7].value
+            console.log(payload)
+            let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
+            let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams;
+            if (numTeams == 0) {
+                mean = 0
+                median = 0
+                min = 0
+                lowerQuartile = 0
+                upperQuartile = 0
+                max = 0
+                returningVeterans = payload[1].value
+                restartedVeterans = payload[2].value
+                rookieTeams = payload[3].value
+                foldedTeams = payload[4].value
+            }
+            else {
+                mean = payload[0].value
+                median = payload[1].value
+                min = payload[2].value
+                bottomWhiskerBarHeight = payload[3].value
+                lowerQuartile = bottomWhiskerBarHeight + min
+                topWhiskerBarHeight = payload[5].value
+                upperQuartile = topWhiskerBarHeight + median!
+                max = payload[6].value + upperQuartile
+                returningVeterans = payload[8].value
+                restartedVeterans = payload[9].value
+                rookieTeams = payload[10].value
+                foldedTeams = payload[11].value
+            }
             return (
-                <div id="custom-tooltip" style={{width: 140}}>
-                    <p>{label}</p>
-                    <p style={{fontSize: 8}}>All values except Teams Included describe <i>percentile rank</i></p>
+                <div id="custom-tooltip" style={{width: 150}}>
+                    <p style={{marginBottom: 20}}>{label}</p>
+                    <p><b>Median: {median.toFixed(2)}</b></p>
                     <p>Mean: {mean.toFixed(2)}</p>
                     <p>Minimum: {min.toFixed(2)}</p>
                     <p>1st Quartile: {lowerQuartile.toFixed(2)}</p>
-                    <p>Median: {median!.toFixed(2)}</p>
                     <p>3rd Quartile: {upperQuartile.toFixed(2)}</p>
-                    <p>Maximum: {max.toFixed(2)}</p>
+                    <p style={{marginBottom: 30}}>Maximum: {max.toFixed(2)}</p>
                     <p>Teams Included: {numTeams}</p>
+                    <p>Returning Veterans: {returningVeterans}</p>
+                    <p>Restarted Veterans: {restartedVeterans}</p>
+                    <p>Rookie Teams: {rookieTeams}</p>
+                    <p>Folded Teams: {foldedTeams}</p>
                 </div>
             );
         }
@@ -276,7 +344,7 @@ function GraphOutputComponent(props: queryType) {
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"15%"} stroke="#EEEEEE" />
             <YAxis domain={[0, 100]} allowDataOverflow={true} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
-            <Tooltip position={{ x: -100, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
+            <Tooltip trigger="click" position={{ x: -100, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
             <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot type="mean"/>} dot={<CustomDot type="mean"/>}/>
             <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot type="median"/>} dot={<CustomDot type="median"/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>
@@ -287,8 +355,13 @@ function GraphOutputComponent(props: queryType) {
             <Bar stackId={'a'} dataKey={'topWhisker'} shape={<DotBar />} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} legendType="none" activeBar={false}/>
             <Bar stackId={'a'} dataKey={'numTeams'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'returningVeterans'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'restartedVeterans'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'rookieTeams'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'foldedTeams'} fill={'none'}/>
         <ZAxis type='number' dataKey='size' range={[0, 250]} />
         </ComposedChart>
+        <p style={{textAlign: "center"}}>Number of Input Teams: {props.teams?.length}</p>
     </div>
 }
 

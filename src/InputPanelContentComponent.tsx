@@ -26,13 +26,13 @@ function InputPanelContentComponent(props: queryType) {
                 teams.push(inputValue)
             }
         }
-        setQuery("?teams=" + teams.map((team) => team) + "&end_year=" + endYear + "&start_year=" + startYear)
+        setQuery("?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear)
     }
 
     return <div style={{margin: 40}}>
         <TeamsInGroupInputComponent teams={props.teams}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
-        <a href={query}><button type='submit' onClick={() => updateQueryString()}>Graph Stats</button></a>
+        <a id="query-link" href={query}><button id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button></a>
     </div>
 }
 

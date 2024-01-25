@@ -1,7 +1,7 @@
 type queryType = {
     teams: string[] | undefined,
-    startYear: number | null,
-    endYear: number | null
+    startYear: number,
+    endYear: number
 }
 
 export default queryType
