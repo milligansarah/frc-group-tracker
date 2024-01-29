@@ -14,12 +14,7 @@ function TeamsInGroupInputComponent(props: {
                 }
             }} style={{minWidth: 40, width: '43%'}} id="start-year" type="text" defaultValue={props.startYear == 0 ? 2022 : props.startYear}></input>
             <HorizontalRule style={{minWidth: "14%"}} id="dash-icon" className="material-icon"/>
-            <input onKeyDown={(e) => {
-                if (e.key == "Enter") {
-                    window.document.getElementById("query-link")?.click()
-                    window.document.getElementById("graph-button")?.click()
-                }
-            }} style={{minWidth: 40, width: '43%'}} id="end-year" type="text" defaultValue={props.endYear == 0 ? 2023 : props.endYear}></input>
+            <input style={{minWidth: 40, width: '43%'}} id="end-year" type="text" defaultValue={props.endYear == 0 ? 2023 : props.endYear}></input>
         </div>
     </div>
 }
