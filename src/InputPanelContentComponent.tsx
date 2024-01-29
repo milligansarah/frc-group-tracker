@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TeamsInGroupInputComponent from "./panel_subcomponents/TeamsInGroupInputComponent";
 import YearRangeInputComponent from "./panel_subcomponents/YearRangeInputComponent";
 import queryType from "./QueryType";
@@ -7,6 +7,15 @@ import { useSearchParams } from "react-router-dom";
 function InputPanelContentComponent(props: queryType) {
     const [searchParams] = useSearchParams();
     const [query, setQuery] = useState("?teams=" + searchParams.get("teams"));
+
+    useEffect(() => {
+        window.document.getElementById("end-year")?.addEventListener('keydown', (e) => {
+            if (e.key == "Enter") {
+                updateQueryString();
+                window.document.getElementById("query-link")?.click()
+            }
+        })
+    })
 
     function updateQueryString() {
         const teams : string[] = []
