@@ -7,13 +7,6 @@ function TeamsInGroupInputComponent(props: {
 }) {
     const [numberOfInputBoxes, setNumberOfInputBoxes] = useState(props.teams?.length ?? 1);
     const [addClicked, setAddClicked] = useState(false)
-
-    useEffect(() => {
-        window.document.getElementById("input" + (numberOfInputBoxes-1))?.scrollIntoView({ behavior: "smooth" })
-        if (props.teams?.length == undefined) {
-            window.document.getElementById("input0")?.focus()
-        }
-    })
     
     function renderInputBoxes() : ReactElement[] {
         const teamsModified : string[] = props.teams == undefined ? [''] : props.teams
