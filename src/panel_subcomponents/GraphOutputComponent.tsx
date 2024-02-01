@@ -63,21 +63,19 @@ function GraphOutputComponent(props: queryType) {
         // Get the district IDs for each team and
         // Get a list of years played for each team (used for several stat calculations)
         let districtTeamPairs : any = {};
-        let yearsPlayed : any = {}
+        let yearsPlayed : any = {} 
         for (let teamIndex in props.teams) {
             const team : string = props.teams[Number(teamIndex)];
             const districtResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/districts?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
             const districtJson = await districtResponse.json();
             const districtId = districtJson[0]['abbreviation'];
             districtTeamPairs[team] = districtId;
-            const yearsPlayedResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/years_participated?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
-            const yearsPlayedArray = await yearsPlayedResponse.json();
-            yearsPlayed[team] = yearsPlayedArray
         }
-        console.log(districtTeamPairs)
         // For each year in the range
         for (let yearIndex in years) {
             const year : number = years[yearIndex]
+            // If the current year is 2022, the last season is 2020. Otherwise, it is the prior year
+            const lastYear : number = year == 2022 ? 2020 : year-1
             // Remove 2021 from the graph, because of the Covid cancellation
             if (year != 2021) {
                 let districtsFetched : any = [];
@@ -96,24 +94,30 @@ function GraphOutputComponent(props: queryType) {
                         districtsFetched.push(teamDistrictId)
                         const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + '' + teamDistrictId + '/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
                         let json = await response.json();
-                        console.log(json)
-                        let ranks : number[] = []
+                        let ranks : any = {}
                         let totalTeamsPlayed : number = 0;
                         // For each team in the data fetched from the API, add the team's ranking to a list if it is in the user's group
                         for (let index in json) {
                             const teamObject : teamAPIRequestType = json[index]
                             const teamNumber : string | undefined = teamObject['team_key']?.substring(3)
                             const teamPoints : number = teamObject['point_total']
-                            const currentTeamYearsPlayed = yearsPlayed[teamNumber]
+                            let currentTeamYearsPlayed = yearsPlayed[teamNumber]
                             if (teamPoints != 0 && teamNumber != undefined) {
                                 totalTeamsPlayed += 1
                                 // This will add all teams
                                 if (props.teams?.includes(teamNumber)) {
-                                    ranks.push(teamObject['rank'])
+                                    if (yearsPlayed[teamNumber] == null) {
+                                        yearsPlayed[teamNumber] = [year]
+                                    }
+                                    else {
+                                        yearsPlayed[teamNumber].push(year)
+                                    }
+                                    currentTeamYearsPlayed = yearsPlayed[teamNumber]
+                                    ranks[teamNumber] = teamObject['rank']
                                     // If the team played the current year
                                     if (currentTeamYearsPlayed.includes(year)) {
                                         // If the team also played the prior year
-                                        if (currentTeamYearsPlayed.includes(year-1)) {
+                                        if (currentTeamYearsPlayed.includes(lastYear)) {
                                             returningVeterans += 1;
                                         }
                                         // If this is the team's first year of play
@@ -121,22 +125,23 @@ function GraphOutputComponent(props: queryType) {
                                             rookieTeams += 1;
                                         }
                                         // If the team didn't play in the prior year, but played in at least one year before
-                                        else if (currentTeamYearsPlayed.includes(year-1) == false 
-                                        && Array.from({length: (year-2) - 1992 + 1}, (_, index) => startYear + index).some((year) => currentTeamYearsPlayed.includes(year))) {
+                                        else if (currentTeamYearsPlayed.includes(lastYear) == false 
+                                        && Array.from({length: (lastYear-1) - 1992 + 1}, (_, index) => startYear + index).some((year) => currentTeamYearsPlayed.includes(year))) {
                                             restartedVeterans += 1;
                                         }
                                     }
                                 }
                             }
-                            else if (props.teams?.includes(teamNumber)) {
-                                if (currentTeamYearsPlayed.includes(year-1)) {
-                                    foldedTeams += 1
-                                }
-                            }
                         }
-                        // Compute the percentile rankings for each team and push it to our global percentile ranks object
-                        for (const rankIndex in ranks) {
-                            percentileRanks.push(100 - ranks[rankIndex] / totalTeamsPlayed * 100)
+                        const teamsInCurrentDistrict = props.teams.filter((team) => districtTeamPairs[team] == teamDistrictId)
+                        for (const teamInCurrentDistrictIndex in teamsInCurrentDistrict) {
+                            const teamInCurrentDistrict = teamsInCurrentDistrict[teamInCurrentDistrictIndex]
+                            if (ranks[teamInCurrentDistrict] != null) {
+                                percentileRanks.push(100 - ranks[teamInCurrentDistrict] / totalTeamsPlayed * 100)
+                            }
+                            else if (yearsPlayed[teamInCurrentDistrict] != null && yearsPlayed[teamInCurrentDistrict].includes(lastYear)) {
+                                foldedTeams += 1
+                            }
                         }
                     }
                 }
