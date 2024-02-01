@@ -6,13 +6,11 @@ import { useSearchParams } from "react-router-dom";
 
 function InputPanelContentComponent(props: queryType) {
     const [searchParams] = useSearchParams();
-    const [query, setQuery] = useState("?teams=" + searchParams.get("teams"));
 
     useEffect(() => {
         window.document.getElementById("end-year")?.addEventListener('keydown', (e) => {
             if (e.key == "Enter") {
                 updateQueryString();
-                window.document.getElementById("query-link")?.click()
             }
         })
     })
@@ -35,13 +33,13 @@ function InputPanelContentComponent(props: queryType) {
                 teams.push(inputValue)
             }
         }
-        setQuery("?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear)
+        window.location.href = "?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear
     }
 
     return <div style={{margin: 40}}>
         <TeamsInGroupInputComponent teams={props.teams}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
-        <a id="query-link" href={query}><button id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button></a>
+        <button id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button>
     </div>
 }
 
