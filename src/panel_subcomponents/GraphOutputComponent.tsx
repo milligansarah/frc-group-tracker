@@ -293,7 +293,7 @@ function GraphOutputComponent(props: queryType) {
                 foldedTeams = payload[11].value
             }
             return (
-                <div id="custom-tooltip" style={{width: 150}}>
+                <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto'}}>
                     <p style={{marginBottom: 20}}>{label}</p>
                     <p><b>Median: {median.toFixed(2)}</b></p>
                     <p>Mean: {mean.toFixed(2)}</p>
