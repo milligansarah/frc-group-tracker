@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/frc-group-tracker/static/css/main.530b9562.css",
-    "main.js": "/frc-group-tracker/static/js/main.21138cdd.js",
+    "main.js": "/frc-group-tracker/static/js/main.a0fc4ed5.js",
     "index.html": "/frc-group-tracker/index.html",
     "main.530b9562.css.map": "/frc-group-tracker/static/css/main.530b9562.css.map",
-    "main.21138cdd.js.map": "/frc-group-tracker/static/js/main.21138cdd.js.map"
+    "main.a0fc4ed5.js.map": "/frc-group-tracker/static/js/main.a0fc4ed5.js.map"
   },
   "entrypoints": [
     "static/css/main.530b9562.css",
-    "static/js/main.21138cdd.js"
+    "static/js/main.a0fc4ed5.js"
   ]
 }
