@@ -54,6 +54,7 @@ function GraphOutputComponent(props: queryType) {
     type graphDataType = [{}?]
     const [newData, setNewData] = useState([] as graphDataType)
     const [show, setShow] = useState(true)
+    const [graphInvalidData, setGraphInvalidData] = useState([] as string[])
 
     async function fetchData() {
         const startYear : number = props.startYear as number
@@ -63,13 +64,23 @@ function GraphOutputComponent(props: queryType) {
         // Get the district IDs for each team and
         // Get a list of years played for each team (used for several stat calculations)
         let districtTeamPairs : any = {};
-        let yearsPlayed : any = {} 
+        let yearsPlayed : any = {};
+        let invalidTeams : string[] = [];
         for (let teamIndex in props.teams) {
             const team : string = props.teams[Number(teamIndex)];
             const districtResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/districts?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
             const districtJson = await districtResponse.json();
-            const districtId = districtJson[0]['abbreviation'];
-            districtTeamPairs[team] = districtId;
+            if (districtJson[0] == undefined) {
+                invalidTeams.push(team)
+            }
+            else {
+                const districtId = districtJson[0]['abbreviation'];
+                districtTeamPairs[team] = districtId;
+            }
+        }
+        if (invalidTeams.length > 0) {
+            setGraphInvalidData(invalidTeams);
+            return
         }
         // For each year in the range
         for (let yearIndex in years) {
@@ -298,7 +309,7 @@ function GraphOutputComponent(props: queryType) {
                 foldedTeams = payload[11].value
             }
             return (
-                <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto'}}>
+                <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -110}}>
                     <p style={{marginBottom: 20}}>{label}</p>
                     <p><b>Median: {median.toFixed(2)}</b></p>
                     <p>Mean: {mean.toFixed(2)}</p>
@@ -334,6 +345,13 @@ function GraphOutputComponent(props: queryType) {
         );
     };
 
+    if (graphInvalidData.length > 0) {
+        if (graphInvalidData.length == 1) {
+            return <p>Input "{graphInvalidData[0]}" is not a valid district team.</p>
+        }
+        return <p>Inputs {graphInvalidData.map((team, index) => (index == graphInvalidData.length-1 && graphInvalidData.length != 1 ? "and " : "") + '"' + team + '" ')} are not valid district teams.</p>
+    }
+
     return show ? <CircularProgress id="loading-icon"/>: <div style={{transform: 'translate(50px, 0)'}}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
                 <div style={{display: 'flex', alignItems: "center", marginRight: 30}}>
@@ -349,7 +367,7 @@ function GraphOutputComponent(props: queryType) {
             <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"15%"} stroke="#EEEEEE" />
             <YAxis domain={[0, 100]} allowDataOverflow={true} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
-            <Tooltip trigger="click" position={{ x: -100, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
+            <Tooltip trigger="click" position={{ x: 0, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
             <Line type="monotone" dataKey="mean" stroke={tealColorClear} strokeWidth={2} strokeDasharray='4, 2' activeDot={<ActiveDot type="mean"/>} dot={<CustomDot type="mean"/>}/>
             <Line type="monotone" dataKey="median" stroke={tealColor} strokeWidth={2} activeDot={<ActiveDot type="median"/>} dot={<CustomDot type="median"/>}/>
             <Bar stackId={'a'} dataKey={'min'} fill={'none'} legendType="none" activeBar={false}/>

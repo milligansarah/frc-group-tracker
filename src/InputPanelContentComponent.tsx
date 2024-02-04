@@ -17,8 +17,8 @@ function InputPanelContentComponent(props: queryType) {
 
     function updateQueryString() {
         const teams : string[] = []
-        let startYear : string = ""
-        let endYear : string = ""
+        let startYear : string = "2022"
+        let endYear : string = "2023"
         const inputs : HTMLCollectionOf<HTMLInputElement> = document.getElementsByTagName("input")
         for (var input in inputs) {
             const inputValue : string = (inputs.item(Number(input)) as HTMLInputElement).value
@@ -33,7 +33,9 @@ function InputPanelContentComponent(props: queryType) {
                 teams.push(inputValue)
             }
         }
-        window.location.href = "?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear
+        if (teams.length > 0) {
+            window.location.href = "?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear
+        }
     }
 
     return <div style={{margin: 40}}>
