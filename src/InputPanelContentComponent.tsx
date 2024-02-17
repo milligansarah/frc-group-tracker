@@ -36,9 +36,12 @@ function InputPanelContentComponent(props: queryType) {
         if (teams.length > 0) {
             window.location.href = "?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear
         }
+        else {
+            (window.document.getElementById("teams-input-boxes")?.firstChild?.lastChild as HTMLElement).focus();
+        }
     }
 
-    return <div style={{margin: 40}}>
+    return <div style={{margin: 40, marginRight: 0, maxWidth: 180}}>
         <TeamsInGroupInputComponent teams={props.teams}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
         <button id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button>

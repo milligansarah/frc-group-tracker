@@ -1,9 +1,10 @@
-import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useState } from "react";
-import { Bar, CartesianGrid, ComposedChart, DotProps, ErrorBar, Legend, Line, LineChart, RectangleProps, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
+import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
+import { Bar, CartesianGrid, ComposedChart, DotProps, ErrorBar, Legend, Line, LineChart, RectangleProps, ResponsiveContainer, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
 import queryType from "../QueryType";
 import { CircularProgress } from "@mui/material";
 import '../index.css';
 import { useHover } from "@uidotdev/usehooks";
+import React from "react";
 
 const tealColor = '#3BBA9C'
 const tealColorClear = '#3BBA9CAA'
@@ -59,7 +60,13 @@ function GraphOutputComponent(props: queryType) {
     async function fetchData() {
         const startYear : number = props.startYear as number
         const endYear : number = props.endYear as number
-        const years : number[] = Array.from({length: endYear - startYear + 1}, (_, index) => startYear + index)
+        if (startYear < 2009 || startYear > 2023 || endYear < 2009 || startYear > 2023 || startYear > endYear) {
+            return;
+        }
+        // Include the year prior to the start year so we can gather "yearsPlayed" data for the prior year
+        // If the start year is 2022, we need to add another year to the span since 2021 is never looped over
+        const yearAdditionFor2022 = startYear == 2022 ? 1 : 0
+        const years : number[] = Array.from({length: endYear - startYear + 2 + yearAdditionFor2022}, (_, index) => startYear - (1 + yearAdditionFor2022) + index)
         const allPercentileRanks : any = {};
         // Get the district IDs for each team and
         // Get a list of years played for each team (used for several stat calculations)
@@ -112,6 +119,7 @@ function GraphOutputComponent(props: queryType) {
                             const teamObject : teamAPIRequestType = json[index]
                             const teamNumber : string | undefined = teamObject['team_key']?.substring(3)
                             const teamPoints : number = teamObject['point_total']
+                            const rookieBonus : number = teamObject['rookie_bonus']
                             let currentTeamYearsPlayed = yearsPlayed[teamNumber]
                             if (teamPoints != 0 && teamNumber != undefined) {
                                 totalTeamsPlayed += 1
@@ -132,11 +140,12 @@ function GraphOutputComponent(props: queryType) {
                                             returningVeterans += 1;
                                         }
                                         // If this is the team's first year of play
-                                        else if (currentTeamYearsPlayed[0] == year) {
+                                        else if (rookieBonus > 0) {
                                             rookieTeams += 1;
                                         }
                                         // If the team didn't play in the prior year, but played in at least one year before
-                                        else if (currentTeamYearsPlayed.includes(lastYear) == false 
+                                        else if (year != startYear 
+                                        && currentTeamYearsPlayed.includes(lastYear) == false 
                                         && Array.from({length: (lastYear-1) - 1992 + 1}, (_, index) => startYear + index).some((year) => currentTeamYearsPlayed.includes(year))) {
                                             restartedVeterans += 1;
                                         }
@@ -171,7 +180,7 @@ function GraphOutputComponent(props: queryType) {
                 // Number of teams
                 let numTeams : number = percentileRanks.length;
                 // If no teams participated, 
-                if (numTeams == 0) {
+                if (numTeams == 0 && year != startYear - 1 - yearAdditionFor2022) {
                     newData.push({
                         Year: year,
                         numTeams: numTeams,
@@ -181,7 +190,27 @@ function GraphOutputComponent(props: queryType) {
                         foldedTeams: foldedTeams
                     })
                 }
-                else {
+                else if (year == 2009) {
+                    newData.push({
+                        Year: year,
+                        median: Number(median!.toFixed(2)),
+                        mean: Number(mean.toFixed(2)),
+                        min: percentileRanks[0],
+                        bottomWhisker: lowerQuartile - percentileRanks[0],
+                        bottomBox: median! - lowerQuartile, 
+                        topBox: upperQuartile - median!,
+                        topWhisker: percentileRanks[percentileRanks.length - 1] - upperQuartile, 
+                        max: percentileRanks[percentileRanks.length - 1],
+                        numTeams: numTeams,
+                        returningVeterans: "N/A for 2009",
+                        restartedVeterans: "N/A for 2009",
+                        rookieTeams: rookieTeams,
+                        foldedTeams: "N/A for 2009"
+                    })
+                }
+                // Since we loop through the year prior to the inputted start year for the purpose of populating the "yearsPlayed" data,
+                // We have to ensure that we don't display that year's data
+                else if (year != startYear - 1 - yearAdditionFor2022) {
                     newData.push({
                         Year: year,
                         median: Number(median!.toFixed(2)),
@@ -279,7 +308,6 @@ function GraphOutputComponent(props: queryType) {
 
     const CustomTooltip = ({ active, payload, label } : any) => {
         if (active && payload && payload.length) {
-            console.log(payload)
             let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
             let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams;
             if (numTeams == 0) {
@@ -309,7 +337,7 @@ function GraphOutputComponent(props: queryType) {
                 foldedTeams = payload[11].value
             }
             return (
-                <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -110}}>
+                <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -120}}>
                     <p style={{marginBottom: 20}}>{label}</p>
                     <p><b>Median: {median.toFixed(2)}</b></p>
                     <p>Mean: {mean.toFixed(2)}</p>
@@ -322,6 +350,8 @@ function GraphOutputComponent(props: queryType) {
                     <p>Restarted Veterans: {restartedVeterans}</p>
                     <p>Rookie Teams: {rookieTeams}</p>
                     <p>Folded Teams: {foldedTeams}</p>
+                    {label == 2020 || label == 2021 ? <p>Teams that did not play in 2020 but were registered for cancelled events are counted as folded teams in 2020, and as restarted veterans in 2022.</p> : null}
+                    {label == 2020 || label == 2021 ? <p>This may change in a future release.</p> : null}
                 </div>
             );
         }
@@ -345,14 +375,37 @@ function GraphOutputComponent(props: queryType) {
         );
     };
 
+    let dataVerificationOutput : ReactElement[] = []
+
     if (graphInvalidData.length > 0) {
         if (graphInvalidData.length == 1) {
-            return <p>Input "{graphInvalidData[0]}" is not a valid district team.</p>
+            dataVerificationOutput.push(<li>Input "{graphInvalidData[0]}" is not a valid district team</li>)
         }
-        return <p>Inputs {graphInvalidData.map((team, index) => (index == graphInvalidData.length-1 && graphInvalidData.length != 1 ? "and " : "") + '"' + team + '" ')} are not valid district teams.</p>
+        else {
+            dataVerificationOutput.push(<li>Inputs {graphInvalidData.map((team, index) => (index == graphInvalidData.length-1 && graphInvalidData.length != 1 ? "and " : "") + '"' + team + '" ')} are not valid district teams</li>)
+        }
     }
 
-    return show ? <CircularProgress id="loading-icon"/>: <div style={{transform: 'translate(50px, 0)'}}>
+    if (props.startYear as number < 2009 || props.startYear as number > 2023 || Number.isNaN(props.startYear as number)) {
+        dataVerificationOutput.push(<li>Start year must be a number between 2009 and 2023</li>)
+    }
+    
+    if (props.endYear as number < 2009 || props.endYear as number > 2023 || Number.isNaN(props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be a number between 2009 and 2023</li>)
+    }
+
+    if ((props.startYear as number) > (props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be greater than start year</li>)
+    }
+
+    if (dataVerificationOutput.length > 1) {
+        return <div><p>Input errors: </p><ul>{dataVerificationOutput.map(element => element)}</ul></div>
+    }
+    else if (dataVerificationOutput.length == 1) {
+        return <div><p>Input error: </p><ul>{dataVerificationOutput.map(element => element)}</ul></div>
+    }
+
+    return show ? <CircularProgress id="loading-icon"/>: <div style={{width: '60vw', height: '80vh'}}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
                 <div style={{display: 'flex', alignItems: "center", marginRight: 30}}>
                     <p style={{fontSize: 12, marginRight: 10}}>Median Percentile Rank</p>
@@ -363,8 +416,9 @@ function GraphOutputComponent(props: queryType) {
                     <div className="line" id="dashed-line"></div>
                 </div>
         </div>
-        <ComposedChart width={800} height={550} data={newData}>
-            <XAxis fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
+        <ResponsiveContainer width={'100%'} height={'90%'}>
+        <ComposedChart data={newData}>
+            <XAxis allowDuplicatedCategory={false} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" dataKey="Year" tickLine={false} />
             <CartesianGrid opacity={"15%"} stroke="#EEEEEE" />
             <YAxis domain={[0, 100]} allowDataOverflow={true} fontFamily="Arial, Helvetica, sans-serif" fontSize={11} strokeWidth={3} stroke="#EEEEEE" tickLine={false}/>
             <Tooltip trigger="click" position={{ x: 0, y: 0 }} content={<CustomTooltip/>} contentStyle={{backgroundColor: "#FF000000", border: "none"}} labelStyle={{fontSize: 14}} itemStyle={{fontSize: 14, fontFamily: "Arial, Helvetica, sans-serif", color: "#EEEEEE", lineHeight: 0.5}} />
@@ -384,6 +438,7 @@ function GraphOutputComponent(props: queryType) {
             <Bar stackId={'a'} dataKey={'foldedTeams'} fill={'none'}/>
         <ZAxis type='number' dataKey='size' range={[0, 250]} />
         </ComposedChart>
+        </ResponsiveContainer>
         <p style={{textAlign: "center"}}>Number of Input Teams: {props.teams?.length}</p>
     </div>
 }

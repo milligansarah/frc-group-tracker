@@ -15,7 +15,7 @@ h1 {
   font-size: x-large;
 }
 
-h1, p {
+h1, p, li {
   color: #EEEEEE;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -32,6 +32,10 @@ h1, p {
 
 #teams-input-boxes > input:last-child{
   margin-bottom: 0px;
+}
+
+#teams-input-boxes > div:first-child{
+  margin-top: 0px;
 }
 
 input {
@@ -76,6 +80,7 @@ input:focus {
   overflow: hidden;
   outline: none;
   color: #EEEEEE;
+  margin-right: 5px;
   padding-left: 0px;
 }
 

@@ -15,7 +15,6 @@ function TeamsInGroupInputComponent(props: {
             inputBoxes.push(<div id={"divinput" + i}><button className={"delete-button"} id={"delete" + i} onClick={(e) => deleteInputBox(e)}><CloseSharp/></button>
             <input autoFocus id={"input" + i} onKeyDown={(e) => shiftFocus(e)} type="text" defaultValue={teamsModified[i]}></input></div>);
         }
-        
         return inputBoxes;
     }
 
@@ -46,7 +45,11 @@ function TeamsInGroupInputComponent(props: {
 
     function deleteInputBox(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         const deleteButtonId = e.currentTarget.id
+        const numberOfInputBoxesBeforeDelete = window.document.getElementById("teams-input-boxes")?.childNodes.length
         window.document.getElementById("divinput" + deleteButtonId.split("delete")[1])?.remove()
+        if (numberOfInputBoxesBeforeDelete == 1) {
+            addInputBox()
+        }
     }
 
     function addInputBox() {
@@ -54,23 +57,24 @@ function TeamsInGroupInputComponent(props: {
         setNumberOfInputBoxes(numberOfInputBoxes + 1)
     }
     
-    return <div id="teams-input-container" style={{display: 'flex', flexDirection: 'column'}}>
+    return <div id="teams-input-container" style={{display: 'flex', flexDirection: 'column', marginBottom: 30}}>
         <h1>Teams In Group</h1>
-        <div id="teams-input-boxes">
-            {renderInputBoxes()}
-        </div>
-        <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
-            {addClicked 
-                ? <AddBox onMouseUp={() => addInputBox()} id="add-button" className="material-icon"/>
-                : <AddBoxOutlined onMouseDown={() => setAddClicked(true)} id="add-button" className="material-icon"></AddBoxOutlined>
-            }
-            <button id="clear-button" onClick={() => {
-                const inputElementContainer = window.document.getElementById("teams-input-boxes");
-                while (inputElementContainer?.lastChild) {
-                    inputElementContainer.removeChild(inputElementContainer.lastChild)
+            <div id="teams-input-boxes">
+                {renderInputBoxes()}
+            </div>
+            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                {addClicked 
+                    ? <AddBox onMouseUp={() => addInputBox()} id="add-button" className="material-icon"/>
+                    : <AddBoxOutlined onMouseDown={() => setAddClicked(true)} id="add-button" className="material-icon"></AddBoxOutlined>
                 }
-            }}>Clear All</button>
-        </div>
+                <button id="clear-button" onClick={() => {
+                    const inputElementContainer = window.document.getElementById("teams-input-boxes");
+                    while (inputElementContainer?.lastChild) {
+                        inputElementContainer.removeChild(inputElementContainer.lastChild)
+                    }
+                    addInputBox();
+                }}>Clear All</button>
+            </div>
     </div>
 }
 
