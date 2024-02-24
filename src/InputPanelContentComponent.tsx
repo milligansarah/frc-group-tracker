@@ -17,8 +17,8 @@ function InputPanelContentComponent(props: queryType) {
 
     function updateQueryString() {
         const teams : string[] = []
-        let startYear : string = "2022"
-        let endYear : string = "2023"
+        let startYear : string = "2023"
+        let endYear : string = "2024"
         const inputs : HTMLCollectionOf<HTMLInputElement> = document.getElementsByTagName("input")
         for (var input in inputs) {
             const inputValue : string = (inputs.item(Number(input)) as HTMLInputElement).value

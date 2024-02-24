@@ -60,7 +60,7 @@ function GraphOutputComponent(props: queryType) {
     async function fetchData() {
         const startYear : number = props.startYear as number
         const endYear : number = props.endYear as number
-        if (startYear < 2009 || startYear > 2023 || endYear < 2009 || startYear > 2023 || startYear > endYear) {
+        if (startYear < 2009 || startYear > 2024 || endYear < 2009 || startYear > 2024 || startYear > endYear) {
             return;
         }
         // Include the year prior to the start year so we can gather "yearsPlayed" data for the prior year
@@ -386,12 +386,12 @@ function GraphOutputComponent(props: queryType) {
         }
     }
 
-    if (props.startYear as number < 2009 || props.startYear as number > 2023 || Number.isNaN(props.startYear as number)) {
-        dataVerificationOutput.push(<li>Start year must be a number between 2009 and 2023</li>)
+    if (props.startYear as number < 2009 || props.startYear as number > 2024 || Number.isNaN(props.startYear as number)) {
+        dataVerificationOutput.push(<li>Start year must be a number between 2009 and 2024</li>)
     }
     
-    if (props.endYear as number < 2009 || props.endYear as number > 2023 || Number.isNaN(props.endYear as number)) {
-        dataVerificationOutput.push(<li>End year must be a number between 2009 and 2023</li>)
+    if (props.endYear as number < 2009 || props.endYear as number > 2024 || Number.isNaN(props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be a number between 2009 and 2024</li>)
     }
 
     if ((props.startYear as number) > (props.endYear as number)) {
