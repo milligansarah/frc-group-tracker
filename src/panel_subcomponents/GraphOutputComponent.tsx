@@ -93,9 +93,9 @@ function GraphOutputComponent(props: queryType) {
         for (let yearIndex in years) {
             const year : number = years[yearIndex]
             // If the current year is 2022, the last season is 2020. Otherwise, it is the prior year
-            const lastYear : number = year == 2022 ? 2020 : year-1
+            const lastYear : number = year == 2022 ? 2019 : year-1
             // Remove 2021 from the graph, because of the Covid cancellation
-            if (year != 2021) {
+            if (year != 2021 && year != 2020) {
                 let districtsFetched : any = [];
                 // Get the percentile ranking for each team in their own district
                 const percentileRanks = [];
@@ -190,7 +190,7 @@ function GraphOutputComponent(props: queryType) {
                         foldedTeams: foldedTeams
                     })
                 }
-                else if (year == 2009) {
+                else if (year == 2009 && year != startYear - 1) {
                     newData.push({
                         Year: year,
                         median: Number(median!.toFixed(2)),
