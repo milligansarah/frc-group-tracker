@@ -339,17 +339,54 @@ function GraphOutputComponent(props: queryType) {
             return (
                 <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -120}}>
                     <p style={{marginBottom: 20}}>{label}</p>
-                    <p><b>Median: {median.toFixed(2)}</b></p>
-                    <p>Mean: {mean.toFixed(2)}</p>
-                    <p>Minimum: {min.toFixed(2)}</p>
-                    <p>1st Quartile: {lowerQuartile.toFixed(2)}</p>
-                    <p>3rd Quartile: {upperQuartile.toFixed(2)}</p>
-                    <p style={{marginBottom: 30}}>Maximum: {max.toFixed(2)}</p>
-                    <p>Teams Included: {numTeams}</p>
-                    <p>Returning Veterans: {returningVeterans}</p>
-                    <p>Restarted Veterans: {restartedVeterans}</p>
-                    <p>Rookie Teams: {rookieTeams}</p>
-                    <p>Folded Teams: {foldedTeams}</p>
+                    <table style={{marginBottom: 30}}>
+                        <tr>
+                            <td><strong>Median</strong></td>
+                            <td><strong>{median.toFixed(2)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Mean</td>
+                            <td>{mean.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Minimum</td>
+                            <td>{min.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>1st Quartile</td>
+                            <td>{lowerQuartile.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>3rd Quartile</td>
+                            <td>{upperQuartile.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Maximum</td>
+                            <td>{max.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                    <table style={{marginBottom: 30}}>
+                        <tr>
+                            <td>Teams Included</td>
+                            <td>{numTeams}</td>
+                        </tr>
+                        <tr>
+                            <td>Returning Veterans</td>
+                            <td>{returningVeterans}</td>
+                        </tr>
+                        <tr>
+                            <td>Restarted Veterans</td>
+                            <td>{restartedVeterans}</td>
+                        </tr>
+                        <tr>
+                            <td>Rookie Teams</td>
+                            <td>{rookieTeams}</td>
+                        </tr>
+                        <tr>
+                            <td>Folded Teams</td>
+                            <td>{foldedTeams}</td>
+                        </tr>
+                    </table>
                     {label == 2020 || label == 2021 ? <p>Teams that did not play in 2020 but were registered for cancelled events are counted as folded teams in 2020, and as restarted veterans in 2022.</p> : null}
                     {label == 2020 || label == 2021 ? <p>This may change in a future release.</p> : null}
                 </div>

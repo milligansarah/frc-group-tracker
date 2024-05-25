@@ -12,8 +12,12 @@ function TeamsInGroupInputComponent(props: {
         const teamsModified : string[] = props.teams == undefined ? [''] : props.teams
         let inputBoxes : ReactElement[] = []
         for(let i = 0; i < numberOfInputBoxes; i++) {
-            inputBoxes.push(<div id={"divinput" + i}><button className={"delete-button"} id={"delete" + i} onClick={(e) => deleteInputBox(e)}><CloseSharp/></button>
-            <input autoFocus id={"input" + i} onKeyDown={(e) => shiftFocus(e)} type="text" defaultValue={teamsModified[i]}></input></div>);
+            inputBoxes.push(<div id={"divinput" + i}>
+                <button className={"delete-button"} id={"delete" + i} onClick={(e) => deleteInputBox(e)}><CloseSharp/></button>
+                <input autoFocus id={"input" + i} onKeyDown={(e) => shiftFocus(e)} type="text" defaultValue={teamsModified[i]}></input>
+                <a href={'https://thebluealliance.com/team/' + teamsModified[i]} target='_blank' style={{marginLeft: 10}}><img width={20} src='tba-logo.png'/></a>
+                <a href={'https://statbotics.io/team/' + teamsModified[i]} target='_blank' style={{margin: 10}}><img width={20} src='statbotics-logo.png'/></a>
+            </div>);
         }
         return inputBoxes;
     }
@@ -22,7 +26,8 @@ function TeamsInGroupInputComponent(props: {
         if (e.key == "Enter") {
             const inputValue = e.currentTarget.value
             const currentInputId = e.currentTarget.id
-            const lastInputId = window.document.getElementById("teams-input-boxes")?.lastElementChild?.lastElementChild?.id;
+            console.log("currentInputId " + currentInputId)
+            const lastInputId = window.document.getElementById("teams-input-boxes")?.lastElementChild?.getElementsByTagName('input')[0]?.id;
             console.log("current: " + currentInputId)
             console.log("last: " + lastInputId)
             if (inputValue == "" && currentInputId == lastInputId) {
@@ -36,6 +41,7 @@ function TeamsInGroupInputComponent(props: {
                 const inputNumber = currentInputId.split("input")[1]
                 let targetInputNumber : number = Number(inputNumber) + 1
                 while (window.document.getElementById("input" + targetInputNumber) == null) {
+                    console.log("while loop")
                     targetInputNumber += 1
                 }
                 window.document.getElementById("input" + (targetInputNumber))?.focus()
