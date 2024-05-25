@@ -7,6 +7,8 @@ import { useSearchParams } from "react-router-dom";
 function InputPanelContentComponent(props: queryType) {
     const [searchParams] = useSearchParams();
 
+    window.addEventListener('resize', updateQueryString);
+
     useEffect(() => {
         window.document.getElementById("end-year")?.addEventListener('keydown', (e) => {
             if (e.key == "Enter") {
