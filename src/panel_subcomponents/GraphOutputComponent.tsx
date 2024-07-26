@@ -3,18 +3,11 @@ import { Bar, CartesianGrid, ComposedChart, DotProps, ErrorBar, Legend, Line, Li
 import queryType from "../QueryType";
 import { CircularProgress } from "@mui/material";
 import '../index.css';
-import { useHover } from "@uidotdev/usehooks";
-import React from "react";
+import { initializeApp } from 'firebase/app';
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 
 const tealColor = '#3BBA9C'
 const tealColorClear = '#3BBA9CAA'
-type teamAPIRequestType = {
-    "event_points": [],
-    "point_total": number,
-    "rank": number,
-    "rookie_bonus": number,
-    "team_key": string
-}
 
 function getMean(data : number[]) {
     return data.reduce((previousValue, currentValue) => previousValue + currentValue, 0) / data.length
@@ -22,6 +15,7 @@ function getMean(data : number[]) {
 
 function getMedian(data: number[]) {
     let median : number | undefined;
+    console.log(data)
     if (data.length % 2 == 1) {
         median = data.at(Math.floor(data.length / 2))
     }
@@ -40,6 +34,20 @@ function getLowerQuartile(data: number[]) {
         return data[Math.floor(dataLength / 4)]
     }
 }
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCVQ2MYhLtTdhvcqpDsraOo9AUhmVWN9oo",
+    authDomain: "frc-group-tracker.firebaseapp.com",
+    projectId: "frc-group-tracker",
+    storageBucket: "frc-group-tracker.appspot.com",
+    messagingSenderId: "923417274992",
+    appId: "1:923417274992:web:e08a78b79e05e617b4a2b5",
+    measurementId: "G-37Y43BPX12"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getFirestore(app);
 
 function getUpperQuartile(data: number[]) {
     let dataLength : number = data.length
@@ -60,7 +68,7 @@ function GraphOutputComponent(props: queryType) {
     async function fetchData() {
         const startYear : number = props.startYear as number
         const endYear : number = props.endYear as number
-        if (startYear < 2009 || startYear > 2024 || endYear < 2009 || startYear > 2024 || startYear > endYear) {
+        if (startYear < 1997 || startYear > 2024 || endYear < 1997 || endYear > 2024 || startYear > endYear) {
             return;
         }
         // Include the year prior to the start year so we can gather "yearsPlayed" data for the prior year
@@ -68,21 +76,20 @@ function GraphOutputComponent(props: queryType) {
         const yearAdditionFor2022 = startYear == 2022 ? 1 : 0
         const years : number[] = Array.from({length: endYear - startYear + 2 + yearAdditionFor2022}, (_, index) => startYear - (1 + yearAdditionFor2022) + index)
         const allPercentileRanks : any = {};
-        // Get the district IDs for each team and
-        // Get a list of years played for each team (used for several stat calculations)
-        let districtTeamPairs : any = {};
-        let yearsPlayed : any = {};
+        // Retrieve team data and validate teams
         let invalidTeams : string[] = [];
+        let teamData : any = [];
+        let yearsPlayed : any = {};
         for (let teamIndex in props.teams) {
             const team : string = props.teams[Number(teamIndex)];
-            const districtResponse = await fetch('https://www.thebluealliance.com/api/v3/team/frc' + team + '/districts?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
-            const districtJson = await districtResponse.json();
-            if (districtJson[0] == undefined) {
-                invalidTeams.push(team)
+            const teamRef = doc(database, "teams", "frc" + team)
+            const docSnap = await getDoc(teamRef)
+            if (docSnap.exists()) {
+                console.log("Document data:", docSnap.data());
+                teamData[team] = docSnap.data()
             }
             else {
-                const districtId = districtJson[0]['abbreviation'];
-                districtTeamPairs[team] = districtId;
+                invalidTeams.push(team)
             }
         }
         if (invalidTeams.length > 0) {
@@ -96,75 +103,48 @@ function GraphOutputComponent(props: queryType) {
             const lastYear : number = year == 2022 ? 2019 : year-1
             // Remove 2021 from the graph, because of the Covid cancellation
             if (year != 2021 && year != 2020) {
-                let districtsFetched : any = [];
                 // Get the percentile ranking for each team in their own district
-                const percentileRanks = [];
+                const percentileRanks : number[] = [];
                 let returningVeterans = 0;
                 let restartedVeterans = 0;
                 let rookieTeams = 0;
                 let foldedTeams = 0;
+                let totalTeamsPlayed = 0;
                 for (let teamIndex in props.teams) {
+                    console.log("Team index " + teamIndex);
                     const team = props.teams[Number(teamIndex)]
-                    const teamDistrictId = districtTeamPairs[team]
-                    // If we don't have the ranking data for the current team's district yet, fetch that data
-                    // and compute the percentile rankings for each team in that district (in the user's group)
-                    if (districtsFetched.includes(teamDistrictId) == false) {
-                        districtsFetched.push(teamDistrictId)
-                        const response = await fetch('https://www.thebluealliance.com/api/v3/district/' + year + '' + teamDistrictId + '/rankings?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV');
-                        let json = await response.json();
-                        let ranks : any = {}
-                        let totalTeamsPlayed : number = 0;
-                        // For each team in the data fetched from the API, add the team's ranking to a list if it is in the user's group
-                        for (let index in json) {
-                            const teamObject : teamAPIRequestType = json[index]
-                            const teamNumber : string | undefined = teamObject['team_key']?.substring(3)
-                            const teamPoints : number = teamObject['point_total']
-                            const rookieBonus : number = teamObject['rookie_bonus']
-                            let currentTeamYearsPlayed = yearsPlayed[teamNumber]
-                            if (teamPoints != 0 && teamNumber != undefined) {
-                                totalTeamsPlayed += 1
-                                // This will add all teams
-                                if (props.teams?.includes(teamNumber)) {
-                                    if (yearsPlayed[teamNumber] == null) {
-                                        yearsPlayed[teamNumber] = [year]
-                                    }
-                                    else {
-                                        yearsPlayed[teamNumber].push(year)
-                                    }
-                                    currentTeamYearsPlayed = yearsPlayed[teamNumber]
-                                    ranks[teamNumber] = teamObject['rank']
-                                    // If the team played the current year
-                                    if (currentTeamYearsPlayed.includes(year)) {
-                                        // If the team also played the prior year
-                                        if (currentTeamYearsPlayed.includes(lastYear)) {
-                                            returningVeterans += 1;
-                                        }
-                                        // If this is the team's first year of play
-                                        else if (rookieBonus > 0) {
-                                            rookieTeams += 1;
-                                        }
-                                        // If the team didn't play in the prior year, but played in at least one year before
-                                        else if (year != startYear 
-                                        && currentTeamYearsPlayed.includes(lastYear) == false 
-                                        && Array.from({length: (lastYear-1) - 1992 + 1}, (_, index) => startYear + index).some((year) => currentTeamYearsPlayed.includes(year))) {
-                                            restartedVeterans += 1;
-                                        }
-                                    }
-                                }
-                            }
+                    const currentTeamData : { [index: string]: any; } = teamData[team]
+                    let currentTeamYearsPlayed : string[] = Object.keys(currentTeamData)
+                    const currentTeamCurrentYearData = currentTeamData[year]
+                    if (currentTeamCurrentYearData === undefined) {
+                        if (currentTeamYearsPlayed.includes(String(lastYear))) {
+                            foldedTeams += 1
                         }
-                        const teamsInCurrentDistrict = props.teams.filter((team) => districtTeamPairs[team] == teamDistrictId)
-                        for (const teamInCurrentDistrictIndex in teamsInCurrentDistrict) {
-                            const teamInCurrentDistrict = teamsInCurrentDistrict[teamInCurrentDistrictIndex]
-                            if (ranks[teamInCurrentDistrict] != null) {
-                                percentileRanks.push(100 - ranks[teamInCurrentDistrict] / totalTeamsPlayed * 100)
-                            }
-                            else if (yearsPlayed[teamInCurrentDistrict] != null && yearsPlayed[teamInCurrentDistrict].includes(lastYear)) {
-                                foldedTeams += 1
-                            }
+                        continue
+                    }
+                    const currentTeamCurrentYearPoints : number = currentTeamCurrentYearData["district_points"] as number
+                    const currentTeamCurrentYearPercentile : number = currentTeamCurrentYearData["percentile"] as number
+                    if (currentTeamCurrentYearPoints != 0) {
+                        percentileRanks.push(currentTeamCurrentYearPercentile)
+                        totalTeamsPlayed += 1
+                        // If the team also played the prior year
+                        if (currentTeamYearsPlayed.includes(String(lastYear)) && currentTeamData[lastYear]["district_points"] != 0) {
+                            returningVeterans += 1;
+                        }
+                        // If there are no prior years of play
+                        else if (Array.from({length: (lastYear) - 1992 + 1}, (_, index) => 1992 + index).some((year) => currentTeamYearsPlayed.includes(String(year))) == false) {
+                            rookieTeams += 1
+                        }
+                        // If the team didn't play in the prior year, but played in at least one year before
+                        else {
+                            restartedVeterans += 1;
                         }
                     }
+                    else if (currentTeamYearsPlayed.includes(String(lastYear))) {
+                        foldedTeams += 1
+                    }
                 }
+                console.log(percentileRanks)
                 // Sort the data
                 percentileRanks.sort(function(a, b) {
                     return a - b;
@@ -173,12 +153,13 @@ function GraphOutputComponent(props: queryType) {
                 let mean : number = getMean(percentileRanks)
                 // Get the median
                 let median : number | undefined = getMedian(percentileRanks);
+                console.log(year, median)
                 // Get the lower quartile
                 let lowerQuartile : number = getLowerQuartile(percentileRanks);
                 // Get the upper quartile
                 let upperQuartile : number = getUpperQuartile(percentileRanks);
                 // Number of teams
-                let numTeams : number = percentileRanks.length;
+                let numTeams : number = totalTeamsPlayed;
                 // If no teams participated, 
                 if (numTeams == 0 && year != startYear - 1 - yearAdditionFor2022) {
                     newData.push({
@@ -188,24 +169,6 @@ function GraphOutputComponent(props: queryType) {
                         restartedVeterans: restartedVeterans,
                         rookieTeams: rookieTeams,
                         foldedTeams: foldedTeams
-                    })
-                }
-                else if (year == 2009 && year != startYear - 1) {
-                    newData.push({
-                        Year: year,
-                        median: Number(median!.toFixed(2)),
-                        mean: Number(mean.toFixed(2)),
-                        min: percentileRanks[0],
-                        bottomWhisker: lowerQuartile - percentileRanks[0],
-                        bottomBox: median! - lowerQuartile, 
-                        topBox: upperQuartile - median!,
-                        topWhisker: percentileRanks[percentileRanks.length - 1] - upperQuartile, 
-                        max: percentileRanks[percentileRanks.length - 1],
-                        numTeams: numTeams,
-                        returningVeterans: "N/A for 2009",
-                        restartedVeterans: "N/A for 2009",
-                        rookieTeams: rookieTeams,
-                        foldedTeams: "N/A for 2009"
                     })
                 }
                 // Since we loop through the year prior to the inputted start year for the purpose of populating the "yearsPlayed" data,
@@ -310,6 +273,7 @@ function GraphOutputComponent(props: queryType) {
         if (active && payload && payload.length) {
             let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
             let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams;
+            console.log(payload)
             if (numTeams == 0) {
                 mean = 0
                 median = 0
@@ -423,12 +387,12 @@ function GraphOutputComponent(props: queryType) {
         }
     }
 
-    if (props.startYear as number < 2009 || props.startYear as number > 2024 || Number.isNaN(props.startYear as number)) {
-        dataVerificationOutput.push(<li>Start year must be a number between 2009 and 2024</li>)
+    if (props.startYear as number < 1997 || props.startYear as number > 2024 || Number.isNaN(props.startYear as number)) {
+        dataVerificationOutput.push(<li>Start year must be a number between 1997 and 2024</li>)
     }
     
-    if (props.endYear as number < 2009 || props.endYear as number > 2024 || Number.isNaN(props.endYear as number)) {
-        dataVerificationOutput.push(<li>End year must be a number between 2009 and 2024</li>)
+    if (props.endYear as number < 1997 || props.endYear as number > 2024 || Number.isNaN(props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be a number between 1997 and 2024</li>)
     }
 
     if ((props.startYear as number) > (props.endYear as number)) {
