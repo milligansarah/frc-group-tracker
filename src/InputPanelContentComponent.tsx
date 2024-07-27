@@ -36,6 +36,8 @@ function InputPanelContentComponent(props: queryType) {
             }
         }
         if (teams.length > 0) {
+            // Removes the "on" parameter added by the individual team checkbox
+            if (teams.includes("on")) teams.pop()
             window.location.href = "?teams=" + teams.map((team) => team) + "&start_year=" + startYear + "&end_year=" + endYear
         }
         else {
