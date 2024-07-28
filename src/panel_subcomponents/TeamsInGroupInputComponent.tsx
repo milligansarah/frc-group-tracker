@@ -1,22 +1,40 @@
-import { AddBox, AddBoxOutlined, CloseSharp, ExitToAppSharp, MinimizeSharp } from "@mui/icons-material";
+import { AddBox, AddBoxOutlined, CloseSharp, ExitToAppSharp, HorizontalRule, MinimizeSharp } from "@mui/icons-material";
 import { ReactElement, useEffect } from "react";
 import { useState } from 'react';
+import YearRangeInputComponent from "./YearRangeInputComponent";
+import TeamAndYearRangePairsType from "../TeamAndYearRangePairType";
 
 function TeamsInGroupInputComponent(props: {
-    teams: string[] | undefined
+    teamAndYearRangePairs: TeamAndYearRangePairsType | undefined
 }) {
-    const [numberOfInputBoxes, setNumberOfInputBoxes] = useState(props.teams?.length ?? 1);
+    const [numberOfInputBoxes, setNumberOfInputBoxes] = useState(Object.keys(props.teamAndYearRangePairs!).length);
     const [addClicked, setAddClicked] = useState(false)
     
     function renderInputBoxes() : ReactElement[] {
-        const teamsModified : string[] = props.teams == undefined ? [''] : props.teams
+        const teamPairsModified : TeamAndYearRangePairsType = props.teamAndYearRangePairs == undefined ? {'': {startYear: 2023, endYear: 2024}} : props.teamAndYearRangePairs
+        const teamsModified : string[] = props.teamAndYearRangePairs == undefined ? [''] : Object.keys(props.teamAndYearRangePairs)
         let inputBoxes : ReactElement[] = []
+        if (numberOfInputBoxes == 0) {
+            addInputBox();
+        }
         for(let i = 0; i < numberOfInputBoxes; i++) {
+            const team = teamsModified[i]
             inputBoxes.push(<div id={"divinput" + i}>
                 <button className={"delete-button"} id={"delete" + i} onClick={(e) => deleteInputBox(e)}><CloseSharp/></button>
-                <input autoFocus id={"input" + i} onKeyDown={(e) => shiftFocus(e)} type="text" defaultValue={teamsModified[i]}></input>
-                <a href={'https://thebluealliance.com/team/' + teamsModified[i]} target='_blank' style={{marginLeft: 10}}><img width={20} src='tba-logo.png'/></a>
-                <a href={'https://statbotics.io/team/' + teamsModified[i]} target='_blank' style={{margin: 10}}><img width={20} src='statbotics-logo.png'/></a>
+                <input style={{width: 50}} autoFocus id={"input" + i} onKeyDown={(e) => shiftFocus(e)} type="text" defaultValue={team}></input>
+                <div>
+                    <a href={'https://thebluealliance.com/team/' + team} target='_blank' style={{marginLeft: 10}}><img width={14} src='tba-logo.png'/></a>
+                    <a href={'https://statbotics.io/team/' + team} target='_blank' style={{margin: 10}}><img width={14} src='statbotics-logo.png'/></a>
+                </div>
+                <div style={{maxWidth: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                    <input defaultValue={teamPairsModified[team]?.startYear || ''} onKeyDown={(e) => {
+                        // if (e.key == "Enter") {
+                        //     window.document.getElementById("end-year")?.focus()
+                        // }
+                    }} style={{width: 42}} id={i + "-start-year"} type="text" ></input>
+                    <HorizontalRule style={{minWidth: "14%"}} id="dash-icon" className="material-icon"/>
+                    <input defaultValue={teamPairsModified[team]?.endYear || ''} style={{width: 42}} id={i + "-end-year"} type="text" ></input>
+                </div>
             </div>);
         }
         return inputBoxes;

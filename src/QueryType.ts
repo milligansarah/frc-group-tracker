@@ -1,5 +1,7 @@
+import TeamAndYearRangePairsType from "./TeamAndYearRangePairType"
+
 type queryType = {
-    teams: string[] | undefined,
+    teams: TeamAndYearRangePairsType | undefined,
     startYear: number,
     endYear: number
 }

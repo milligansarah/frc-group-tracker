@@ -5,7 +5,7 @@ import GraphOutputComponent from "./panel_subcomponents/GraphOutputComponent";
 
 function OutputPanelContentComponent(props: queryType) {
     return <div style={{position: 'relative', top: '50vh', left: '50%', height: 'fit-content', width: 'fit-content', transform: 'translate(-50%, -50%)'}}>
-        {props.teams === undefined || props.endYear === null || props.startYear == null 
+        { Object.keys(props.teams!).length == 0 || props.endYear == 0 || props.startYear == 0
             ? <GetStartedOutputComponent/> 
             : <GraphOutputComponent teams={props.teams} startYear={props.startYear} endYear={props.endYear} />}
     </div>
