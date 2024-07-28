@@ -196,7 +196,7 @@ function GraphOutputComponent(props: queryType) {
                     }
                     for (const team in teams) {
                         const key : string = teams[team as any] as string
-                        thisYearData[key] = percentileRanks[Number(team)]
+                        thisYearData[key] = percentileRanksTeamPairs[key]
                     }
                     newData.push(thisYearData)
                 }
@@ -279,7 +279,6 @@ function GraphOutputComponent(props: queryType) {
 
     const CustomTooltip = ({ active, payload, label } : any) => {
         if (active && payload && payload.length) {
-            console.log(payload)
             let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
             let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams;
             if (numTeams == 0) {

@@ -27,7 +27,6 @@ function InputPanelContentComponent(props: queryType) {
         for (var input in inputs) {
             const inputValue : string = (inputs.item(Number(input)) as HTMLInputElement).value
             const inputId : string = (inputs.item(Number(input)) as HTMLInputElement).id
-            console.log(inputValue)
             if (inputId == "start-year") {
                 startYear = inputValue
             }
@@ -65,7 +64,6 @@ function InputPanelContentComponent(props: queryType) {
                 }
             }
             teamQuery = teamQuery.substring(0, teamQuery.length - 1)
-            console.log("q: " + teamQuery)
             window.location.href = "?teams=" + teamQuery + "&start_year=" + startYear + "&end_year=" + endYear
         }
         else {
