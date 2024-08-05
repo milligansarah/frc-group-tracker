@@ -15,7 +15,13 @@ h1 {
   font-size: x-large;
 }
 
-h1, p, li, td {
+h2 {
+  font-size: large;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+h1, h2, p, li, td, text {
   color: #EEEEEE;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -52,7 +58,7 @@ input:focus {
   box-shadow: -2px 2px var(--fadedBlueTextboxShadow);
 }
 
-#clear-button, #graph-button {
+#clear-button, #graph-button, .fill-button {
   background-color: var(--tealColorButtonFaded);
   color: #EEEEEE;
   border: none;
@@ -67,7 +73,7 @@ input:focus {
   margin-top: 0;
 }
 
-#graph-button:active, #clear-button:active {
+#graph-button:active, #clear-button:active, .fill-button:active {
   box-shadow: none;
   transform: translate(-3px, 4px)
 }
@@ -97,7 +103,7 @@ input:focus {
 }
 
 #teams-input-boxes {
-  max-height: 40vh;
+  max-height: 28vh;
   overflow-y: auto;
   overflow-x: hidden;
   margin-bottom: 12px;

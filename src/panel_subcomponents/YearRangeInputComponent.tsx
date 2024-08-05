@@ -5,7 +5,7 @@ function TeamsInGroupInputComponent(props: {
     startYear: number,
     endYear: number
 }) {
-    return <div>
+    return <div style={{marginBottom: 20}}>
         <h1>Year Range</h1>
         <div style={{maxWidth: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
             <input placeholder="2023" onKeyDown={(e) => {
