@@ -75,7 +75,7 @@ function LocationInputComponent(props: {
         </div>
         { isLoading ? 
             <CircularProgress style={{width: 30, height: 30}} id="loading-icon"/> :
-            <button className="fill-button" onClick={fillTeams}>Fill Teams</button>}
+            <button className="fill-button" style={{width: 80}} onClick={fillTeams}>Fill Teams</button>}
     </div>
 }
 

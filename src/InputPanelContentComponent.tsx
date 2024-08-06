@@ -33,13 +33,13 @@ function InputPanelContentComponent(props: queryType) {
             else if (inputId == "end-year") {
                 endYear = inputValue
             }
-            else if (inputId.includes("-start-year") && Number(inputValue) != 0) {
+            else if (inputId.includes("-start-year") && inputId.includes("event") == false && Number(inputValue) != 0) {
                 teamQuery += "s" + inputValue
             }
-            else if (inputId.includes("-end-year") && Number(inputValue) != 0) {
+            else if (inputId.includes("-end-year") && inputId.includes("event") == false && Number(inputValue) != 0) {
                 teamQuery += "e" + inputValue
             }
-            else if (inputValue != "" && inputId.includes("group") == false) {
+            else if (inputValue != "" && inputId.includes("team-input-")) {
                 // Removes the "on" parameter added by the individual team checkbox                
                 if (inputValue == "on") {
                     continue

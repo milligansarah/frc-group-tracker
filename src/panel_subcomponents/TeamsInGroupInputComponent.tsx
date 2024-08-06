@@ -4,6 +4,7 @@ import YearRangeInputComponent from "./YearRangeInputComponent";
 import TeamAndYearRangePairsType from "../TeamAndYearRangePairType";
 import Collapsible from "react-collapsible";
 import LocationInputComponent from "./LocationInputComponent";
+import EventInputComponent from "./EventInputComponent";
 
 function TeamsInGroupInputComponent(props: {
     teamAndYearRangePairsProp: TeamAndYearRangePairsType | undefined
@@ -42,6 +43,7 @@ function TeamsInGroupInputComponent(props: {
 
     function addInputBox() {
         setInputBoxes([...inputBoxes, '']);
+        setAddClicked(false)
     }
 
     function deleteInputBox(index: number) {
@@ -103,7 +105,7 @@ function TeamsInGroupInputComponent(props: {
                 onOpening={() => setEventDropdownOpen(true)}
                 onClosing={() => setEventDropdownOpen(false)}>
                 <div style={{ marginBottom: 25 }}>
-                    <p style={{marginTop: 0}}>Coming Soon</p>
+                    <EventInputComponent setInputFunction={setInputTeamsFromChild}/>
                 </div>
             </Collapsible>
             <div id="teams-input-boxes">
@@ -113,7 +115,7 @@ function TeamsInGroupInputComponent(props: {
                             <CloseSharp />
                         </button>
                         <input
-                            id={`input${index}`}
+                            id={`team-input-${index}`}
                             style={{ width: 50 }}
                             autoFocus={index === inputBoxes.length - 1}
                             type="text"

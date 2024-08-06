@@ -63,10 +63,11 @@ input:focus {
   color: #EEEEEE;
   border: none;
   font-size: small;
-  margin-top: 38px;
+  margin-top: 20px;
   border-radius: 10px;
   padding: 10px;
   box-shadow: -3px 4px var(--tealColorButtonFadedShadow);
+  margin-left: 3px;
 }
 
 #clear-button {
