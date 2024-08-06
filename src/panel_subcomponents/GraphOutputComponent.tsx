@@ -9,7 +9,8 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 const tealColor = '#3BBA9C'
 const tealColorClear = '#3BBA9CAA'
 const offWhiteColor = '#EEEEEE'
-let individualTeamsVisible = false
+let individualTeamsToggle = false
+let individualTeamsVisible : string[] = []
 
 function getMean(data : number[]) {
     return data.reduce((previousValue, currentValue) => previousValue + currentValue, 0) / data.length
@@ -385,18 +386,21 @@ function GraphOutputComponent(props: queryType) {
         return (
             <>
                 <circle className="teamDot" visibility={"hidden"} cx={cx} cy={cy} r={3} fill={offWhiteColor} onClick={() => toggleTeamPointVisibility(id)}/>
-                <text id={id} visibility={"hidden"} x={cx + 12} y={cy + 3}><a style={{fontFamily: "Arial, Helvetica, sans-serif", fontSize: 10, stroke: offWhiteColor, strokeWidth: 0.01, fill: offWhiteColor, textDecoration: "underline"}} target="_blank" href={'https://www.thebluealliance.com/team/' + dataKey + '/' + payload["Year"]}>{dataKey}: {value.toFixed(2)}</a></text>
+                <text className="teamText" id={id} visibility={"hidden"} x={cx + 12} y={cy + 3}><a style={{fontFamily: "Arial, Helvetica, sans-serif", fontSize: 10, stroke: offWhiteColor, strokeWidth: 0.01, fill: offWhiteColor, textDecoration: "underline"}} target="_blank" href={'https://www.thebluealliance.com/team/' + dataKey + '/' + payload["Year"]}>{dataKey}: {value.toFixed(2)}</a></text>
             </>
         );
     };
 
     let toggleTeamPointVisibility = (id: string) => {
         if (document.getElementById(id)?.style.visibility == "visible") {
+            individualTeamsVisible = [...individualTeamsVisible].filter((value) => value != id)
             document.getElementById(id)!.style.visibility = 'hidden' 
         }
         else {
             document.getElementById(id)!.style.visibility = 'visible'
+            individualTeamsVisible = [...individualTeamsVisible, id]
         }
+        console.log(individualTeamsVisible)
     }
 
     const CustomDot = (props: any) => {
@@ -488,9 +492,22 @@ function GraphOutputComponent(props: queryType) {
             <Checkbox
                 onChange={() => {
                     const dots = document.getElementsByClassName("teamDot")!
-                    individualTeamsVisible = !individualTeamsVisible;
+                    const teamsText = document.getElementsByClassName("teamText")!
+                    individualTeamsToggle = !individualTeamsToggle;
                     for (const index in dots) {
-                        (dots.item(Number(index))! as HTMLElement).style.visibility = individualTeamsVisible ? "visible" : "hidden"
+                        (dots.item(Number(index))! as HTMLElement).style.visibility = individualTeamsToggle ? "visible" : "hidden"
+                    }
+                    // Hide all team numbers
+                    if (individualTeamsToggle == false) {
+                        for (const index in teamsText) {
+                            (teamsText.item(Number(index))! as HTMLElement).style.visibility = "hidden"
+                        }
+                    }
+                    // Show any team numbers that were previously toggled on
+                    if (individualTeamsToggle) {
+                        for (const index in individualTeamsVisible) {
+                            document.getElementById(individualTeamsVisible[index])!.style.visibility = "visible"
+                        }
                     }
                 }}
                 sx={{

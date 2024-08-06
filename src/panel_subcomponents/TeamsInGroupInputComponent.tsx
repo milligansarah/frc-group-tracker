@@ -124,10 +124,10 @@ function TeamsInGroupInputComponent(props: {
                             onKeyDown={(e) => handleInputKeyDown(index, e)}
                         />
                         <div>
-                            <a href={`https://thebluealliance.com/team/${team}`} target='_blank' style={{ marginLeft: 10 }}>
+                            <a href={`https://thebluealliance.com/team/${team}`} tabIndex={-1} target='_blank' style={{ marginLeft: 10 }}>
                                 <img width={14} src='tba-logo.png' />
                             </a>
-                            <a href={`https://statbotics.io/team/${team}`} target='_blank' style={{ margin: 10 }}>
+                            <a href={`https://statbotics.io/team/${team}`} tabIndex={-1} target='_blank' style={{ margin: 10 }}>
                                 <img width={14} src='statbotics-logo.png' />
                             </a>
                         </div>
