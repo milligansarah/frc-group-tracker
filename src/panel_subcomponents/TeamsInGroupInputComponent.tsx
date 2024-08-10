@@ -112,12 +112,12 @@ function TeamsInGroupInputComponent(props: {
                             onChange={(e) => handleTeamInputChange(index, e.target.value)}
                             onKeyDown={(e) => handleInputKeyDown(index, e)}
                         />
-                        <div>
-                            <a href={`https://thebluealliance.com/team/${input.team}`} tabIndex={-1} target='_blank' style={{ marginLeft: 10 }}>
-                                <img width={14} src='tba-logo.png' />
+                        <div style={{alignItems: "center", display: "flex", flexDirection: "column", margin: "2px 10px"}}>
+                            <a href={`https://thebluealliance.com/team/${input.team}`} tabIndex={-1} target='_blank' style={{height: 16, margin: 0, marginBottom: 3}}>
+                                <img width={16} src='tba-logo.png' />
                             </a>
-                            <a href={`https://statbotics.io/team/${input.team}`} tabIndex={-1} target='_blank' style={{ margin: 10 }}>
-                                <img width={14} src='statbotics-logo.png' />
+                            <a href={`https://statbotics.io/team/${input.team}`} tabIndex={-1} target='_blank' style={{height: 16, margin: 0}}>
+                                <img width={16} src='statbotics-logo.png' />
                             </a>
                         </div>
                         <div style={{ maxWidth: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
