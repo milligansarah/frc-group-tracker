@@ -387,13 +387,13 @@ function GraphOutputComponent(props: queryType) {
         // toggle text visibility on clicked
         return (
             <>
-                <circle className="teamDot" visibility={"hidden"} cx={cx} cy={cy} r={3} fill={offWhiteColor} onClick={() => toggleTeamPointVisibility(id)}/>
+                <circle className="teamDot" visibility={"hidden"} cx={cx} cy={cy} r={3} fill={offWhiteColor} onClick={() => toggleElementVisibility(dataKey + "line")} onMouseOver={() => toggleElementVisibility(id)}/>
                 <text className="teamText" id={id} visibility={"hidden"} x={cx + 12} y={cy + 3}><a style={{fontFamily: "Arial, Helvetica, sans-serif", fontSize: 10, stroke: offWhiteColor, strokeWidth: 0.01, fill: offWhiteColor, textDecoration: "underline"}} target="_blank" href={'https://www.thebluealliance.com/team/' + dataKey + '/' + payload["Year"]}>{dataKey}: {value.toFixed(2)}</a></text>
             </>
         );
     };
 
-    let toggleTeamPointVisibility = (id: string) => {
+    let toggleElementVisibility = (id: string) => {
         if (document.getElementById(id)?.style.visibility == "visible") {
             individualTeamsVisible = [...individualTeamsVisible].filter((value) => value != id)
             document.getElementById(id)!.style.visibility = 'hidden' 
@@ -417,8 +417,9 @@ function GraphOutputComponent(props: queryType) {
         const teams = props.teams!.map((object) => object.team)
         const teamDisplays = []
         for (const team in teams) {
-            console.log(teams[team as any])
-            teamDisplays.push(<Line type="monotone" dataKey={teams[team as any]} stroke="none" dot={<TeamDot/>} activeDot={<TeamDot/>}/>)
+            const id = teams[team as any] + "line"
+            console.log(id)
+            teamDisplays.push(<Line type="monotone" id={id} dataKey={teams[team as any]} stroke="#EEEEEE" style={{visibility: "hidden"}} dot={<TeamDot/>} activeDot={<TeamDot/>}/>)
         }
         return teamDisplays
     }
