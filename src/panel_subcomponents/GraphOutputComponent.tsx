@@ -82,9 +82,8 @@ function GraphOutputComponent(props: queryType) {
         let invalidTeams : string[] = [];
         let teamData : any = [];
         let yearsPlayed : any = {};
-        let teams : string[] = Object.keys(props.teams!) ?? []
-        for (let teamIndex in teams) {
-            const team : string = teams[Number(teamIndex)];
+        for (let index in props.teams) {
+            const team : string = props.teams[index as any].team
             const teamRef = doc(database, "teams", "frc" + team)
             const docSnap = await getDoc(teamRef)
             if (docSnap.exists()) {
@@ -112,11 +111,13 @@ function GraphOutputComponent(props: queryType) {
                 let rookieTeams = 0;
                 let foldedTeams = 0;
                 let totalTeamsPlayed = 0;
-                for (let teamIndex in teams) {
-                    const team = teams[Number(teamIndex)]
+                for (let index in props.teams) {
+                    const team = props.teams![index as any].team
+                    const teamStartYear = props.teams![index as any].startYear
+                    const teamEndYear = props.teams![index as any].endYear
                     // If the year is not in the range for this particular team, skip
-                    if (props.teams![team].endYear != undefined && props.teams![team].startYear != undefined
-                        && (year > props.teams![team].endYear! || year < props.teams![team].startYear!)) {
+                    if (teamEndYear != undefined && teamStartYear != undefined
+                        && (year > teamEndYear! || year < teamStartYear!)) {
                         continue
                     }
                     const currentTeamData : { [index: string]: any; } = teamData[team]
@@ -195,10 +196,11 @@ function GraphOutputComponent(props: queryType) {
                         rookieTeams: rookieTeams,
                         foldedTeams: foldedTeams,
                     }
-                    for (const team in teams) {
-                        const key : string = teams[team as any] as string
+                    for (const index in props.teams) {
+                        const key : string = props.teams[index as any].team as string
                         thisYearData[key] = percentileRanksTeamPairs[key]
                     }
+                    console.log(thisYearData)
                     newData.push(thisYearData)
                 }
                 allPercentileRanks[year] = percentileRanks
@@ -412,9 +414,10 @@ function GraphOutputComponent(props: queryType) {
     };
 
     const getIndividualTeamDisplays = () => {
-        const teams = Object.keys(props.teams!)
+        const teams = props.teams!.map((object) => object.team)
         const teamDisplays = []
         for (const team in teams) {
+            console.log(teams[team as any])
             teamDisplays.push(<Line type="monotone" dataKey={teams[team as any]} stroke="none" dot={<TeamDot/>} activeDot={<TeamDot/>}/>)
         }
         return teamDisplays
@@ -486,7 +489,10 @@ function GraphOutputComponent(props: queryType) {
         <ZAxis type='number' dataKey='size' range={[0, 250]} />
         </ComposedChart>
         </ResponsiveContainer>
-        <p style={{textAlign: "center", marginBottom: 0}}>Number of Input Teams: {Object.keys(props.teams!).length}</p>
+        <p style={{textAlign: "center", marginBottom: 0}}>Number of Input Teams: {
+            // Counts number of unique teams in input
+            props.teams!.map(object => object.team).filter((value, index, self) => self.indexOf(value) === index).length
+        }</p>
         <div style={{display: 'flex', justifyContent: 'center'}}>
             <p style={{fontSize: 14, marginLeft: 10}}>Display individual teams</p>
             <Checkbox

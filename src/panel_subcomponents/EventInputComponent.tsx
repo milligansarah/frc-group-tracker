@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TeamAndYearRangePairsType from "../TeamAndYearRangePairType";
+import TeamAndYearRangeType from "../TeamAndYearRangePairType";
 import { CircularProgress } from "@mui/material";
 import { HorizontalRule } from "@mui/icons-material";
 
@@ -17,7 +17,7 @@ function EventInputComponent(props: {
         if (startYear == undefined || endYear == undefined || startYear > endYear) {
             return
         }
-        const finalTeamInputList : TeamAndYearRangePairsType = {}
+        const finalTeamInputList : TeamAndYearRangeType[] = []
         for (let year : number = Number(startYear); year <= Number(endYear); year += 1) {
             const teamsResponse = await fetch("https://www.thebluealliance.com/api/v3/event/" + year + "" + eventCode + "/teams/keys?X-TBA-Auth-Key=Qvh4XAMdIteMcXIaz6eunrLmGlseHtDnb4NrUMALYuNErSOgcKPBsNSMEWDMgVyV");
             const teamsJson = await teamsResponse.json() as [];
@@ -26,7 +26,7 @@ function EventInputComponent(props: {
             }
             for (const teamIndex in teamsJson) {
                 const team : string = (teamsJson[teamIndex] as string).split("frc")[1]
-                finalTeamInputList[team] = {}
+                finalTeamInputList.push({team: team})
             }
         }
         props.setInputFunction(finalTeamInputList)

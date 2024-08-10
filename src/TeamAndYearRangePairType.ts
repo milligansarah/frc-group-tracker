@@ -1,8 +1,7 @@
-interface YearRange {
+type TeamAndYearRangeType = {
+    team: string;
     startYear?: number;
     endYear?: number;
 }
 
-type TeamAndYearRangePairsType = {[team: string]: YearRange}
-
-export default TeamAndYearRangePairsType
+export default TeamAndYearRangeType

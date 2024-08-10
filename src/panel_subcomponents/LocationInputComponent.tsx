@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TeamAndYearRangePairsType from "../TeamAndYearRangePairType";
+import TeamAndYearRangeType from "../TeamAndYearRangePairType";
 import { CircularProgress } from "@mui/material";
 
 function LocationInputComponent(props: {
@@ -22,7 +22,7 @@ function LocationInputComponent(props: {
             allTeams = allTeams.concat(teamsJson) as []
         }
         while (teamsJson.length != 0)
-        const finalTeamInputList : TeamAndYearRangePairsType = {}
+        const finalTeamInputList : TeamAndYearRangeType[] = []
         console.log(allTeams)
 
         switch (props.locationType) {
@@ -31,7 +31,7 @@ function LocationInputComponent(props: {
                     const teamDict = allTeams[teamIndex as any]
                     console.log(teamDict)
                     if (teamDict["country"] == inputValue) {
-                        finalTeamInputList[teamDict["team_number"]] = {}
+                        finalTeamInputList.push({team: teamDict["team_number"]})
                     }
                 }
                 break;
@@ -40,7 +40,7 @@ function LocationInputComponent(props: {
                     const teamDict = allTeams[teamIndex as any]
                     console.log(teamDict)
                     if (teamDict["state_prov"] == inputValue) {
-                        finalTeamInputList[teamDict["team_number"]] = {}
+                        finalTeamInputList.push({team: teamDict["team_number"]})
                     }
                 }
                 break;
@@ -49,7 +49,7 @@ function LocationInputComponent(props: {
                     const teamDict = allTeams[teamIndex as any]
                     console.log(teamDict)
                     if (teamDict["city"] == inputValue) {
-                        finalTeamInputList[teamDict["team_number"]] = {}
+                        finalTeamInputList.push({team: teamDict["team_number"]})
                     }
                 }
                 break;
@@ -58,7 +58,7 @@ function LocationInputComponent(props: {
                     const teamDict = allTeams[teamIndex as any]
                     console.log(teamDict)
                     if (teamDict["postal_code"] == inputValue) {
-                        finalTeamInputList[teamDict["team_number"]] = {}
+                        finalTeamInputList.push({team: teamDict["team_number"]})
                     }
                 }
                 break;

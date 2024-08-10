@@ -1,67 +1,58 @@
 import { AddBox, AddBoxOutlined, CloseSharp, ExpandMore, HorizontalRule, KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 import { ReactElement, useState } from "react";
 import YearRangeInputComponent from "./YearRangeInputComponent";
-import TeamAndYearRangePairsType from "../TeamAndYearRangePairType";
+import TeamAndYearRangeType from "../TeamAndYearRangePairType";
 import Collapsible from "react-collapsible";
 import LocationInputComponent from "./LocationInputComponent";
 import EventInputComponent from "./EventInputComponent";
 
 function TeamsInGroupInputComponent(props: {
-    teamAndYearRangePairsProp: TeamAndYearRangePairsType | undefined
+    teamAndYearRangesProp: TeamAndYearRangeType[] | undefined
 }) {
-    const [teamAndYearRangePairs, setTeamAndYearRangePairs] = useState<TeamAndYearRangePairsType>(props.teamAndYearRangePairsProp || {});
-    const [inputBoxes, setInputBoxes] = useState<string[]>(Object.keys(teamAndYearRangePairs));
+    const [teamAndYearRanges, setTeamAndYearRanges] = useState<TeamAndYearRangeType[]>(props.teamAndYearRangesProp || []);
     const [addClicked, setAddClicked] = useState(false);
     const [locationDropdownOpen, setLocationDropdownOpen] = useState(false)
     const [eventDropdownOpen, setEventDropdownOpen] = useState(false)
 
     function handleTeamInputChange(index: number, value: string) {
-        const updatedInputBoxes = [...inputBoxes];
-        updatedInputBoxes[index] = value;
-        setInputBoxes(updatedInputBoxes);
+        const updatedTeamAndYearRanges = [...teamAndYearRanges];
+        updatedTeamAndYearRanges[index].team = value;
+        setTeamAndYearRanges(updatedTeamAndYearRanges);
     }
 
-    function handleStartYearInputChange(team: string, startYear: number) {
-        setTeamAndYearRangePairs(prevState => ({
-            ...prevState,
-            [team]: {
-                ...prevState[team],
-                startYear: startYear
-            }
-        }));
+    function handleStartYearInputChange(index: number, startYear: number) {
+        const updatedTeamAndYearRanges = [...teamAndYearRanges];
+        updatedTeamAndYearRanges[index].startYear = startYear;
+        setTeamAndYearRanges(updatedTeamAndYearRanges);
     }
 
-    function handleEndYearInputChange(team: string, endYear: number) {
-        setTeamAndYearRangePairs(prevState => ({
-            ...prevState,
-            [team]: {
-                ...prevState[team],
-                endYear: endYear
-            }
-        }));
+    function handleEndYearInputChange(index: number, endYear: number) {
+        const updatedTeamAndYearRanges = [...teamAndYearRanges];
+        updatedTeamAndYearRanges[index].endYear = endYear;
+        setTeamAndYearRanges(updatedTeamAndYearRanges);
     }
 
     function addInputBox() {
-        setInputBoxes([...inputBoxes, '']);
+        setTeamAndYearRanges([...teamAndYearRanges, { team: '', startYear: 0, endYear: 0 }]);
         setAddClicked(false)
     }
 
     function deleteInputBox(index: number) {
-        const updatedInputBoxes = inputBoxes.filter((_, i) => i !== index);
-        setInputBoxes(updatedInputBoxes);
+        const updatedTeamAndYearRanges = teamAndYearRanges.filter((_, i) => i !== index);
+        setTeamAndYearRanges(updatedTeamAndYearRanges);
     }
 
     function handleInputKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter") {
-            if (inputBoxes[index] === "") {
-                if (index === inputBoxes.length - 1) {
+            if (teamAndYearRanges[index].team === "") {
+                if (index === teamAndYearRanges.length - 1) {
                     addInputBox();
                 }
                 return;
             }
 
             const nextIndex = index + 1;
-            if (nextIndex < inputBoxes.length) {
+            if (nextIndex < teamAndYearRanges.length) {
                 document.getElementById(`input${nextIndex}`)?.focus();
             } else {
                 addInputBox();
@@ -70,13 +61,11 @@ function TeamsInGroupInputComponent(props: {
     }
 
     function clearInputs() {
-        setInputBoxes(['']);
-        setTeamAndYearRangePairs({});
+        setTeamAndYearRanges([])
     }
 
-    function setInputTeamsFromChild(teams: TeamAndYearRangePairsType) {
-        setTeamAndYearRangePairs(teams);
-        setInputBoxes(Object.keys(teams));
+    function setInputTeamsFromChild(teams: TeamAndYearRangeType[]) {
+        setTeamAndYearRanges(teams);
     }
 
     return (
@@ -109,7 +98,7 @@ function TeamsInGroupInputComponent(props: {
                 </div>
             </Collapsible>
             <div id="teams-input-boxes">
-                {inputBoxes.map((team, index) => (
+                {teamAndYearRanges.map((input, index) => (
                     <div key={index} id={`divinput${index}`}>
                         <button className="delete-button" id={`delete${index}`} onClick={() => deleteInputBox(index)}>
                             <CloseSharp />
@@ -117,32 +106,32 @@ function TeamsInGroupInputComponent(props: {
                         <input
                             id={`team-input-${index}`}
                             style={{ width: 50 }}
-                            autoFocus={index === inputBoxes.length - 1}
+                            autoFocus={index === teamAndYearRanges.length - 1}
                             type="text"
-                            value={team}
+                            value={input.team}
                             onChange={(e) => handleTeamInputChange(index, e.target.value)}
                             onKeyDown={(e) => handleInputKeyDown(index, e)}
                         />
                         <div>
-                            <a href={`https://thebluealliance.com/team/${team}`} tabIndex={-1} target='_blank' style={{ marginLeft: 10 }}>
+                            <a href={`https://thebluealliance.com/team/${input.team}`} tabIndex={-1} target='_blank' style={{ marginLeft: 10 }}>
                                 <img width={14} src='tba-logo.png' />
                             </a>
-                            <a href={`https://statbotics.io/team/${team}`} tabIndex={-1} target='_blank' style={{ margin: 10 }}>
+                            <a href={`https://statbotics.io/team/${input.team}`} tabIndex={-1} target='_blank' style={{ margin: 10 }}>
                                 <img width={14} src='statbotics-logo.png' />
                             </a>
                         </div>
                         <div style={{ maxWidth: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                             <input
-                                value={teamAndYearRangePairs[team]?.startYear || ''}
-                                onChange={(e) => handleStartYearInputChange(team, Number(e.target.value))}
+                                value={teamAndYearRanges[index]?.startYear || ''}
+                                onChange={(e) => handleStartYearInputChange(index, Number(e.target.value))}
                                 style={{ width: 42 }}
                                 id={`${index}-start-year`}
                                 type="text"
                             />
                             <HorizontalRule style={{ minWidth: "14%" }} id="dash-icon" className="material-icon" />
                             <input
-                                value={teamAndYearRangePairs[team]?.endYear || ''}
-                                onChange={(e) => handleEndYearInputChange(team, Number(e.target.value))}
+                                value={teamAndYearRanges[index]?.endYear || ''}
+                                onChange={(e) => handleEndYearInputChange(index, Number(e.target.value))}
                                 style={{ width: 42 }}
                                 id={`${index}-end-year`}
                                 type="text"

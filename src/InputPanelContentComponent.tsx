@@ -3,7 +3,7 @@ import TeamsInGroupInputComponent from "./panel_subcomponents/TeamsInGroupInputC
 import YearRangeInputComponent from "./panel_subcomponents/YearRangeInputComponent";
 import queryType from "./QueryType";
 import { useSearchParams } from "react-router-dom";
-import TeamAndYearRangePairsType from "./TeamAndYearRangePairType";
+import TeamAndYearRangeType from "./TeamAndYearRangePairType";
 
 function InputPanelContentComponent(props: queryType) {
     const [searchParams] = useSearchParams();
@@ -58,7 +58,7 @@ function InputPanelContentComponent(props: queryType) {
     }
 
     return <div style={{margin: 40, marginRight: 0, maxWidth: 300}}>
-        <TeamsInGroupInputComponent teamAndYearRangePairsProp={props.teams as TeamAndYearRangePairsType}/>
+        <TeamsInGroupInputComponent teamAndYearRangesProp={props.teams as TeamAndYearRangeType[]}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
         <button style={{marginBottom: 40}} id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button>
     </div>
