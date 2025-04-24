@@ -19,8 +19,8 @@ function InputPanelContentComponent(props: queryType) {
     })
 
     function updateQueryString() {
-        let startYear : string = "2023"
-        let endYear : string = "2024"
+        let startYear : string = "2024"
+        let endYear : string = "2025"
         let numTeams : number = 0
         const inputs : HTMLCollectionOf<HTMLInputElement> = document.getElementsByTagName("input")
         let teamQuery : string = ""
@@ -58,7 +58,8 @@ function InputPanelContentComponent(props: queryType) {
     }
 
     return <div style={{margin: 40, marginRight: 0, maxWidth: 300}}>
-        <TeamsInGroupInputComponent teamAndYearRangesProp={props.teams as TeamAndYearRangeType[]}/>
+        {/* Creates an empty input component if there are no input teams */}
+        <TeamsInGroupInputComponent teamAndYearRangesProp={props.teams?.length == 0 ? [{team: '', startYear: 0, endYear: 0}] as TeamAndYearRangeType[] : props.teams as TeamAndYearRangeType[]}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
         <button style={{marginBottom: 40}} id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button>
     </div>

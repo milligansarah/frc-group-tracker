@@ -70,7 +70,7 @@ function GraphOutputComponent(props: queryType) {
     async function fetchData() {
         let startYear : number = props.startYear as number
         let endYear : number = props.endYear as number
-        if (startYear < 1997 || startYear > 2024 || endYear < 1997 || endYear > 2024 || startYear > endYear) {
+        if (startYear < 1997 || startYear > 2025 || endYear < 1997 || endYear > 2025 || startYear > endYear) {
             return;
         }
         // Include the year prior to the start year so we can gather "yearsPlayed" data for the prior year
@@ -435,12 +435,12 @@ function GraphOutputComponent(props: queryType) {
         }
     }
 
-    if (props.startYear as number < 1997 || props.startYear as number > 2024 || Number.isNaN(props.startYear as number)) {
-        dataVerificationOutput.push(<li>Start year must be a number between 1997 and 2024</li>)
+    if (props.startYear as number < 1997 || props.startYear as number > 2025 || Number.isNaN(props.startYear as number)) {
+        dataVerificationOutput.push(<li>Start year must be a number between 1997 and 2025</li>)
     }
     
-    if (props.endYear as number < 1997 || props.endYear as number > 2024 || Number.isNaN(props.endYear as number)) {
-        dataVerificationOutput.push(<li>End year must be a number between 1997 and 2024</li>)
+    if (props.endYear as number < 1997 || props.endYear as number > 2025 || Number.isNaN(props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be a number between 1997 and 2025</li>)
     }
 
     if ((props.startYear as number) > (props.endYear as number)) {
