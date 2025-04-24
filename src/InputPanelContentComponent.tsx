@@ -58,7 +58,8 @@ function InputPanelContentComponent(props: queryType) {
     }
 
     return <div style={{margin: 40, marginRight: 0, maxWidth: 300}}>
-        <TeamsInGroupInputComponent teamAndYearRangesProp={props.teams as TeamAndYearRangeType[]}/>
+        {/* Creates an empty input component if there are no input teams */}
+        <TeamsInGroupInputComponent teamAndYearRangesProp={props.teams?.length == 0 ? [{team: '', startYear: 0, endYear: 0}] as TeamAndYearRangeType[] : props.teams as TeamAndYearRangeType[]}/>
         <YearRangeInputComponent startYear={props.startYear} endYear={props.endYear}/>
         <button style={{marginBottom: 40}} id="graph-button" type='submit' onClick={() => updateQueryString()}>Graph Stats</button>
     </div>
