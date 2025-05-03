@@ -111,6 +111,9 @@ function GraphOutputComponent(props: queryType) {
                 let rookieTeams = 0;
                 let foldedTeams = 0;
                 let totalTeamsPlayed = 0;
+                let eventsWon = 0;
+                let awardsWon = 0;
+                let dcmpSlots = 0;
                 for (let index in props.teams) {
                     const team = props.teams![index as any].team
                     const teamStartYear = props.teams![index as any].startYear
@@ -132,6 +135,11 @@ function GraphOutputComponent(props: queryType) {
                     const currentTeamCurrentYearPoints : number = currentTeamCurrentYearData["district_points"] as number
                     const currentTeamCurrentYearPercentile : number = currentTeamCurrentYearData["percentile"] as number
                     if (currentTeamCurrentYearPoints != 0) {
+                        // Did the team win any events or awards?
+                        // Aggregate data
+                        eventsWon += currentTeamData[year]["events_won"] || 0;
+                        awardsWon += currentTeamData[year]["awards_won"] || 0;
+                        dcmpSlots += currentTeamData[year]["dcmp_qualified"]! ? 1 : 0;
                         percentileRanksTeamPairs[team] = currentTeamCurrentYearPercentile
                         totalTeamsPlayed += 1
                         // If the team also played the prior year
@@ -174,7 +182,10 @@ function GraphOutputComponent(props: queryType) {
                         returningVeterans: returningVeterans,
                         restartedVeterans: restartedVeterans,
                         rookieTeams: rookieTeams,
-                        foldedTeams: foldedTeams
+                        foldedTeams: foldedTeams,
+                        eventsWon: eventsWon,
+                        awardsWon: awardsWon,
+                        dcmpSlots: dcmpSlots
                     })
                 }
                 // Since we loop through the year prior to the inputted start year for the purpose of populating the "yearsPlayed" data,
@@ -195,12 +206,14 @@ function GraphOutputComponent(props: queryType) {
                         restartedVeterans: restartedVeterans,
                         rookieTeams: rookieTeams,
                         foldedTeams: foldedTeams,
+                        eventsWon: eventsWon,
+                        awardsWon: awardsWon,
+                        dcmpSlots: dcmpSlots,
                     }
                     for (const index in props.teams) {
                         const key : string = props.teams[index as any].team as string
                         thisYearData[key] = percentileRanksTeamPairs[key]
                     }
-                    console.log(thisYearData)
                     newData.push(thisYearData)
                 }
                 allPercentileRanks[year] = percentileRanks
@@ -283,7 +296,8 @@ function GraphOutputComponent(props: queryType) {
     const CustomTooltip = ({ active, payload, label } : any) => {
         if (active && payload && payload.length) {
             let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
-            let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams;
+            let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams, eventsWon, awardsWon, dcmpSlots, cmpSlots;
+            console.log(payload)
             if (numTeams == 0) {
                 mean = 0
                 median = 0
@@ -291,10 +305,6 @@ function GraphOutputComponent(props: queryType) {
                 lowerQuartile = 0
                 upperQuartile = 0
                 max = 0
-                returningVeterans = payload[8].value
-                restartedVeterans = payload[9].value
-                rookieTeams = payload[10].value
-                foldedTeams = payload[11].value
             }
             else {
                 mean = payload[0].value
@@ -305,11 +315,15 @@ function GraphOutputComponent(props: queryType) {
                 topWhiskerBarHeight = payload[5].value
                 upperQuartile = topWhiskerBarHeight + median!
                 max = payload[6].value + upperQuartile
-                returningVeterans = payload[8].value
-                restartedVeterans = payload[9].value
-                rookieTeams = payload[10].value
-                foldedTeams = payload[11].value
             }
+            returningVeterans = payload[8].value
+            restartedVeterans = payload[9].value
+            rookieTeams = payload[10].value
+            foldedTeams = payload[11].value
+            eventsWon = payload[12].value
+            awardsWon = payload[13].value
+            dcmpSlots = payload[14].value
+            // cmpSlots = payload[15].value
             return (
                 <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -120}}>
                     <p style={{marginBottom: 20}}>{label}</p>
@@ -360,6 +374,18 @@ function GraphOutputComponent(props: queryType) {
                             <td>Folded Teams</td>
                             <td>{foldedTeams}</td>
                         </tr>
+                        <tr>
+                            <td>Events Won</td>
+                            <td>{eventsWon}</td>
+                        </tr>
+                        <tr>
+                            <td>Awards Won</td>
+                            <td>{awardsWon}</td>
+                        </tr>
+                        <tr>
+                            <td>DCMP Slots Earned</td>
+                            <td>{dcmpSlots}</td>
+                        </tr> 
                     </table>
                     {label == 2020 || label == 2021 ? <p>Teams that did not play in 2020 but were registered for cancelled events are counted as folded teams in 2020, and as restarted veterans in 2022.</p> : null}
                     {label == 2020 || label == 2021 ? <p>This may change in a future release.</p> : null}
@@ -486,6 +512,9 @@ function GraphOutputComponent(props: queryType) {
             <Bar stackId={'a'} dataKey={'restartedVeterans'} fill={'none'}/>
             <Bar stackId={'a'} dataKey={'rookieTeams'} fill={'none'}/>
             <Bar stackId={'a'} dataKey={'foldedTeams'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'eventsWon'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'awardsWon'} fill={'none'}/>
+            <Bar stackId={'a'} dataKey={'dcmpSlots'} fill={'none'}/>
             {getIndividualTeamDisplays()}
         <ZAxis type='number' dataKey='size' range={[0, 250]} />
         </ComposedChart>
