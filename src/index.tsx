@@ -9,11 +9,9 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
     <BrowserRouter basename='/frc-group-tracker'>
       <Routes>
         <Route path='/' element={<App/>}/>
       </Routes>  
     </BrowserRouter>
-  </React.StrictMode>
 );

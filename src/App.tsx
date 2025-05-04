@@ -2,6 +2,8 @@ import InputPanelContentComponent from './InputPanelContentComponent';
 import OutputPanelContentComponent from './OutputPanelContentComponent';
 import { useSearchParams } from 'react-router-dom';
 import TeamAndYearRangeType from './TeamAndYearRangePairType';
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { useEffect } from 'react';
 
 const darkBlueBackgroundColor = '#2E3047'
 
@@ -11,6 +13,14 @@ function App() {
   const teams : string[] | undefined = searchParams.get('teams')?.split(',')
   const startYear : number = Number(searchParams.get('start_year'))
   const endYear : number = Number(searchParams.get('end_year')) 
+
+  // Log the query string to Firebase Analytics
+  const analytics = getAnalytics();
+  useEffect(() => {
+    logEvent(analytics, 'query_string_update', { query_string: searchParams.toString() });
+    console.log("Query String Logged from App.tsx: " + searchParams.toString());
+  }, []);
+
   let teamAndYearRanges : TeamAndYearRangeType[] = []
   for (const teamDataIndex in teams) {
     const teamData : string = teams[teamDataIndex as any]
