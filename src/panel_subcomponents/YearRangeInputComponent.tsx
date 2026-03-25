@@ -12,9 +12,9 @@ function TeamsInGroupInputComponent(props: {
                 if (e.key == "Enter") {
                     window.document.getElementById("end-year")?.focus()
                 }
-            }} style={{minWidth: 60, width: '43%'}} id="start-year" type="text" defaultValue={props.startYear == 0 ? 2024 : props.startYear}></input>
+            }} style={{minWidth: 60, width: '43%'}} id="start-year" type="text" defaultValue={props.startYear == 0 ? 2025 : props.startYear}></input>
             <HorizontalRule style={{minWidth: "14%"}} id="dash-icon" className="material-icon"/>
-            <input style={{minWidth: 60, width: '43%'}} id="end-year" type="text" defaultValue={props.endYear == 0 ? 2025 : props.endYear}></input>
+            <input style={{minWidth: 60, width: '43%'}} id="end-year" type="text" defaultValue={props.endYear == 0 ? 2026 : props.endYear}></input>
         </div>
     </div>
 }

@@ -38,13 +38,13 @@ function getLowerQuartile(data: number[]) {
 }
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCVQ2MYhLtTdhvcqpDsraOo9AUhmVWN9oo",
-    authDomain: "frc-group-tracker.firebaseapp.com",
-    projectId: "frc-group-tracker",
-    storageBucket: "frc-group-tracker.appspot.com",
-    messagingSenderId: "923417274992",
-    appId: "1:923417274992:web:e08a78b79e05e617b4a2b5",
-    measurementId: "G-37Y43BPX12"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -70,7 +70,7 @@ function GraphOutputComponent(props: queryType) {
     async function fetchData() {
         let startYear : number = props.startYear as number
         let endYear : number = props.endYear as number
-        if (startYear < 1997 || startYear > 2025 || endYear < 1997 || endYear > 2025 || startYear > endYear) {
+        if (startYear < 1997 || startYear > 2026 || endYear < 1997 || endYear > 2026 || startYear > endYear) {
             return;
         }
         // Include the year prior to the start year so we can gather "yearsPlayed" data for the prior year
@@ -461,12 +461,12 @@ function GraphOutputComponent(props: queryType) {
         }
     }
 
-    if (props.startYear as number < 1997 || props.startYear as number > 2025 || Number.isNaN(props.startYear as number)) {
-        dataVerificationOutput.push(<li>Start year must be a number between 1997 and 2025</li>)
+    if (props.startYear as number < 1997 || props.startYear as number > 2026 || Number.isNaN(props.startYear as number)) {
+        dataVerificationOutput.push(<li>Start year must be a number between 1997 and 2026</li>)
     }
     
-    if (props.endYear as number < 1997 || props.endYear as number > 2025 || Number.isNaN(props.endYear as number)) {
-        dataVerificationOutput.push(<li>End year must be a number between 1997 and 2025</li>)
+    if (props.endYear as number < 1997 || props.endYear as number > 2026 || Number.isNaN(props.endYear as number)) {
+        dataVerificationOutput.push(<li>End year must be a number between 1997 and 2026</li>)
     }
 
     if ((props.startYear as number) > (props.endYear as number)) {
