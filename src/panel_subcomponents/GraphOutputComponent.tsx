@@ -294,36 +294,32 @@ function GraphOutputComponent(props: queryType) {
     };
 
     const CustomTooltip = ({ active, payload, label } : any) => {
-        if (active && payload && payload.length) {
-            let numTeams : number = payload[0].dataKey == "numTeams" ? payload[0].value : payload[7].value
-            let mean, median, min, bottomWhiskerBarHeight, lowerQuartile, topWhiskerBarHeight, upperQuartile, max, returningVeterans, restartedVeterans, rookieTeams, foldedTeams, eventsWon, awardsWon, dcmpSlots, cmpSlots;
-            console.log(payload)
-            if (numTeams == 0) {
-                mean = 0
-                median = 0
-                min = 0
-                lowerQuartile = 0
-                upperQuartile = 0
-                max = 0
-            }
-            else {
-                mean = payload[0].value
-                median = payload[1].value
-                min = payload[2].value
-                bottomWhiskerBarHeight = payload[3].value
-                lowerQuartile = bottomWhiskerBarHeight + min
-                topWhiskerBarHeight = payload[5].value
-                upperQuartile = topWhiskerBarHeight + median!
-                max = payload[6].value + upperQuartile
-            }
-            returningVeterans = payload[8].value
-            restartedVeterans = payload[9].value
-            rookieTeams = payload[10].value
-            foldedTeams = payload[11].value
-            eventsWon = payload[12].value
-            awardsWon = payload[13].value
-            dcmpSlots = payload[14].value
-            // cmpSlots = payload[15].value
+        if (active && Array.isArray(payload) && payload.length > 0) {
+            const valuesByKey = payload.reduce((acc: Record<string, number>, entry: any) => {
+                if (entry && typeof entry === 'object' && entry.dataKey) {
+                    acc[entry.dataKey] = Number(entry.value ?? 0)
+                }
+                return acc
+            }, {})
+
+            const numTeams = Number(valuesByKey.numTeams ?? 0)
+            const mean = numTeams === 0 ? 0 : Number(valuesByKey.mean ?? 0)
+            const median = numTeams === 0 ? 0 : Number(valuesByKey.median ?? 0)
+            const min = numTeams === 0 ? 0 : Number(valuesByKey.min ?? 0)
+            const bottomWhiskerBarHeight = numTeams === 0 ? 0 : Number(valuesByKey.bottomWhisker ?? 0)
+            const lowerQuartile = numTeams === 0 ? 0 : min + bottomWhiskerBarHeight
+            const topWhiskerBarHeight = numTeams === 0 ? 0 : Number(valuesByKey.topWhisker ?? 0)
+            const upperQuartile = numTeams === 0 ? 0 : Number(valuesByKey.median ?? 0) + topWhiskerBarHeight
+            const max = numTeams === 0 ? 0 : Number(valuesByKey.max ?? 0)
+            const returningVeterans = Number(valuesByKey.returningVeterans ?? 0)
+            const restartedVeterans = Number(valuesByKey.restartedVeterans ?? 0)
+            const rookieTeams = Number(valuesByKey.rookieTeams ?? 0)
+            const foldedTeams = Number(valuesByKey.foldedTeams ?? 0)
+            const eventsWon = Number(valuesByKey.eventsWon ?? 0)
+            const awardsWon = Number(valuesByKey.awardsWon ?? 0)
+            const dcmpSlots = Number(valuesByKey.dcmpSlots ?? 0)
+            // const cmpSlots = Number(valuesByKey.cmpSlots ?? 0)
+
             return (
                 <div id="custom-tooltip" style={{width: 150, pointerEvents: 'auto', animation: 'none', position: 'relative', left: -120}}>
                     <p style={{marginBottom: 20}}>{label}</p>
@@ -397,7 +393,10 @@ function GraphOutputComponent(props: queryType) {
     };
 
     let ActiveDot = (props: any) => {
-        const { cx, cy, type } = props;
+        const { cx, cy, type, payload } = props;
+        if (payload?.numTeams === 0 || cx == null || cy == null) {
+            return null;
+        }
 
         return (
             <circle cx={cx} cy={cy} r={type.includes("median") ? 8 : 6} stroke={tealColorClear} strokeWidth={2} fill="transparent" />
@@ -432,7 +431,10 @@ function GraphOutputComponent(props: queryType) {
     }
 
     const CustomDot = (props: any) => {
-        const { cx, cy, type } = props;
+        const { cx, cy, type, payload } = props;
+        if (payload?.numTeams === 0 || cx == null || cy == null) {
+            return null;
+        }
 
         return (
             <circle cx={cx} cy={cy} r={type.includes("median") ? 5 : 4} fill={tealColorClear} />
